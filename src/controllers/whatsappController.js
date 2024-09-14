@@ -2,6 +2,8 @@ const messageService = require('../services/messageService');
 
 exports.sendMenu = async (req, res) => {
     const { to } = req.body;
+    console.log("Body",req.body)
+    console.log("tooooo",to)
     try {
         const responseMessage = await messageService.sendMenu(to);
         res.status(200).send(responseMessage);
@@ -31,7 +33,7 @@ exports.receiveMessage = async (req, res) => {
     }
 
     try {
-        await messageService.processMessage(responseMessage, to);
+        await messageService.processMessage(responseMessage, To);
         res.status(200).send('Resposta processada com sucesso!');
     } catch (error) {
         res.status(500).send(error.message);

@@ -5,6 +5,8 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;   // Do .env
 const client = require('twilio')(accountSid, authToken);
 
 const sendMenu = async (toNumber) => {
+
+    console.log("destinatario to : ", toNumber)
     const menuBody = `
     Olá! Escolha uma das opções abaixo:
     1. Opção 1
