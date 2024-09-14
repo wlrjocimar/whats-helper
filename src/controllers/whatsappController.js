@@ -39,13 +39,29 @@ exports.receiveMessage = async (req, res) => {
     console.log("Dados do request*******", req.body);
     const { Body, From } = req.body;
     console.log("cheguei");
-    
-    let responseMessage = '';
 
     // Verifica se o usuário já tem um estado registrado
     if (!userInteractions[From]) {
         userInteractions[From] = { hasInteracted: true, isTransferredToHuman: false };
+    }
+
+    const userInteraction = userInteractions[From];
+    let responseMessage = '';
+
+    // Se o usuário foi transferido para atendimento humano, não envia respostas automáticas
+    if (userInteraction.isTransferredToHuman) {
         responseMessage = `
+Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
+
+🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
+
+❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
+        `;
+    } else {
+        // Se o usuário ainda não interagiu ou se está interagindo pela primeira vez
+        if (!userInteraction.hasInteracted) {
+            userInteraction.hasInteracted = true;
+            responseMessage = `
 🌟 **Menu Principal** 🌟
 
 Por favor, escolha uma das opções abaixo:
@@ -57,21 +73,9 @@ Por favor, escolha uma das opções abaixo:
 🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
 
 ❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
-        `;
-    } else {
-        const userInteraction = userInteractions[From];
-        
-        // Se o usuário foi transferido para atendimento humano, não envia respostas automáticas
-        if (userInteraction.isTransferredToHuman) {
-            responseMessage = `
-Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
-
-🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
-
-❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
             `;
         } else {
-            // Verifica e processa a mensagem do usuário
+            // Processa a resposta do usuário
             switch (Body) {
                 case '1':
                     responseMessage = 'Você escolheu a Opção 1!';
@@ -124,12 +128,15 @@ Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um a
     }
 
     try {
-        await messageService.processMessage(responseMessage, From);
+        if (responseMessage) {
+            await messageService.processMessage(responseMessage, From);
+        }
         res.status(200).send('Resposta processada com sucesso!');
     } catch (error) {
         res.status(500).send(error.message);
     }
 };
+
 
 
 exports.sendManualMessage = async (req, res) => {
