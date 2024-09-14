@@ -42,14 +42,15 @@ exports.receiveMessage = async (req, res) => {
 
     // Verifica se o usuário já tem um estado registrado
     if (!userInteractions[From]) {
-        userInteractions[From] = { hasInteracted: true, isTransferredToHuman: false };
+        userInteractions[From] = { hasInteracted: true, isTransferredToHuman: 0 };
     }
 
     const userInteraction = userInteractions[From];
     let responseMessage = '';
 
     // Se o usuário foi transferido para atendimento humano, não envia respostas automáticas
-    if (userInteraction.isTransferredToHuman) {
+    if (userInteraction.isTransferredToHuman==1) {
+        userInteractions[From] = { hasInteracted: true, isTransferredToHuman: 2 };
         responseMessage = `
 Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
 
@@ -143,7 +144,7 @@ exports.sendManualMessage = async (req, res) => {
     console.log("Mensagem manual", req.body);
 
     const { message, To } = req.body;
-    userInteractions[To] = { hasInteracted: true, isTransferredToHuman: true };
+    userInteractions[To] = { hasInteracted: true, isTransferredToHuman: 2 };
     console.log("cheguei");
     
     let responseMessage = message;
