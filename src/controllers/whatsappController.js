@@ -8,14 +8,28 @@ exports.sendMenu = async (req, res) => {
     console.log("Body", req.body);
     console.log("tooooo", to);
 
+    const menuMessage = `
+🌟 **Menu Principal** 🌟
+
+Por favor, escolha uma das opções abaixo:
+
+1️⃣ **Opção 1**: Descrição breve da Opção 1.
+2️⃣ **Opção 2**: Descrição breve da Opção 2.
+3️⃣ **Opção 3**: Descrição breve da Opção 3.
+
+🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
+
+❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
+    `;
+
     try {
-        // Envia o menu para o usuário
-        const responseMessage = await messageService.sendMenu(to);
+        // Envia o menu estilizado para o usuário
+        await messageService.sendMessage(to, menuMessage);
         // Inicializa o estado do usuário
         if (!userInteractions[to]) {
             userInteractions[to] = { hasInteracted: false };
         }
-        res.status(200).send(responseMessage);
+        res.status(200).send('Menu enviado com sucesso!');
     } catch (error) {
         res.status(500).send(error.message);
     }
@@ -31,14 +45,38 @@ exports.receiveMessage = async (req, res) => {
     // Verifica se o usuário já tem um estado registrado
     if (!userInteractions[From]) {
         userInteractions[From] = { hasInteracted: true }; // Marca o usuário como interagido
-        responseMessage = 'Obrigado por entrar em contato! Por favor, escolha uma das opções abaixo:\n1. Opção 1\n2. Opção 2\n3. Opção 3';
+        responseMessage = `
+🌟 **Menu Principal** 🌟
+
+Por favor, escolha uma das opções abaixo:
+
+1️⃣ **Opção 1**: Descrição breve da Opção 1.
+2️⃣ **Opção 2**: Descrição breve da Opção 2.
+3️⃣ **Opção 3**: Descrição breve da Opção 3.
+
+🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
+
+❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
+        `;
     } else {
         const userInteraction = userInteractions[From];
         
         // Verifica se o usuário já interagiu antes
         if (!userInteraction.hasInteracted) {
             userInteraction.hasInteracted = true;
-            responseMessage = 'Obrigado por entrar em contato! Por favor, escolha uma das opções abaixo:\n1. Opção 1\n2. Opção 2\n3. Opção 3';
+            responseMessage = `
+🌟 **Menu Principal** 🌟
+
+Por favor, escolha uma das opções abaixo:
+
+1️⃣ **Opção 1**: Descrição breve da Opção 1.
+2️⃣ **Opção 2**: Descrição breve da Opção 2.
+3️⃣ **Opção 3**: Descrição breve da Opção 3.
+
+🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
+
+❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
+            `;
         } else {
             // Processa a resposta do usuário
             switch (Body) {
@@ -51,13 +89,32 @@ exports.receiveMessage = async (req, res) => {
                 case '3':
                     responseMessage = 'Você escolheu a Opção 3!';
                     break;
-                default:
-                    responseMessage = 'Opção inválida. Por favor, escolha 1, 2 ou 3.\n\nDigite "menu" para retornar ao menu principal.';
-            }
+                case 'menu':
+                    responseMessage = `
+🌟 **Menu Principal** 🌟
 
-            // Se a resposta for "menu", enviar o menu novamente
-            if (Body.toLowerCase() === 'menu') {
-                responseMessage = 'Obrigado por entrar em contato! Por favor, escolha uma das opções abaixo:\n1. Opção 1\n2. Opção 2\n3. Opção 3';
+Por favor, escolha uma das opções abaixo:
+
+1️⃣ **Opção 1**: Descrição breve da Opção 1.
+2️⃣ **Opção 2**: Descrição breve da Opção 2.
+3️⃣ **Opção 3**: Descrição breve da Opção 3.
+
+🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
+
+❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
+                    `;
+                    break;
+                case 'ajuda':
+                    responseMessage = 'Para ajuda, entre em contato com o suporte.';
+                    break;
+                default:
+                    responseMessage = `
+❌ Opção inválida. Por favor, escolha 1, 2 ou 3.
+
+🔄 Para retornar ao menu principal, digite *menu*.
+
+❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
+                    `;
             }
         }
     }
