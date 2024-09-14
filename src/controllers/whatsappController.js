@@ -130,10 +130,10 @@ Por favor, escolha uma das opções abaixo:
 
 exports.sendManualMessage = async (req, res) => {
     console.log("Mensagem manual", req.body);
-    const { Body, To } = req.body;
+    const { message, To } = req.body;
     console.log("cheguei");
     
-    let responseMessage = req.body;
+    let responseMessage = message;
 
     
 
