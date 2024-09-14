@@ -126,3 +126,21 @@ Por favor, escolha uma das opções abaixo:
         res.status(500).send(error.message);
     }
 };
+
+
+exports.sendManualMessage = async (req, res) => {
+    console.log("Mensagem manual", req.body);
+    const { Body, To } = req.body;
+    console.log("cheguei");
+    
+    let responseMessage = req.body;
+
+    
+
+    try {
+        await messageService.processMessage(responseMessage, To);
+        res.status(200).send('Resposta processada com sucesso!');
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
