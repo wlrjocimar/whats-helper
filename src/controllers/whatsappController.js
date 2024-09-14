@@ -11,6 +11,10 @@ exports.sendMenu = async (req, res) => {
     try {
         // Envia o menu para o usuário
         const responseMessage = await messageService.sendMenu(to);
+        // Inicializa o estado do usuário
+        if (!userInteractions[to]) {
+            userInteractions[to] = { hasInteracted: false };
+        }
         res.status(200).send(responseMessage);
     } catch (error) {
         res.status(500).send(error.message);
@@ -24,17 +28,19 @@ exports.receiveMessage = async (req, res) => {
     
     let responseMessage = '';
 
-    // Inicializa o estado do usuário se não existir
+    // Verifica se o usuário já tem um estado registrado
     if (!userInteractions[From]) {
-        userInteractions[From] = { hasInteracted: false };
+        userInteractions[From] = { hasInteracted: true }; // Marca o usuário como interagido
         responseMessage = 'Obrigado por entrar em contato! Por favor, escolha uma das opções abaixo:\n1. Opção 1\n2. Opção 2\n3. Opção 3';
     } else {
         const userInteraction = userInteractions[From];
         
+        // Verifica se o usuário já interagiu antes
         if (!userInteraction.hasInteracted) {
             userInteraction.hasInteracted = true;
             responseMessage = 'Obrigado por entrar em contato! Por favor, escolha uma das opções abaixo:\n1. Opção 1\n2. Opção 2\n3. Opção 3';
         } else {
+            // Processa a resposta do usuário
             switch (Body) {
                 case '1':
                     responseMessage = 'Você escolheu a Opção 1!';
