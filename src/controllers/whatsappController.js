@@ -42,7 +42,7 @@ exports.receiveMessage = async (req, res) => {
 
     // Verifica se o usuário já tem um estado registrado
     if (!userInteractions[From]) {
-        userInteractions[From] = { hasInteracted: true, isTransferredToHuman: 0 };
+        userInteractions[From] = { hasInteracted: false, isTransferredToHuman: 0 };
     }
 
     const userInteraction = userInteractions[From];
