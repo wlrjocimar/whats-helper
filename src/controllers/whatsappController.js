@@ -24,10 +24,10 @@ Por favor, escolha uma das opções abaixo:
 
     try {
         // Envia o menu estilizado para o usuário
-        await messageService.processMessage(menuMessage,to );
+        await messageService.processMessage(menuMessage, to);
         // Inicializa o estado do usuário
         if (!userInteractions[to]) {
-            userInteractions[to] = { hasInteracted: false };
+            userInteractions[to] = { hasInteracted: false, isTransferredToHuman: false };
         }
         res.status(200).send('Menu enviado com sucesso!');
     } catch (error) {
@@ -44,7 +44,7 @@ exports.receiveMessage = async (req, res) => {
 
     // Verifica se o usuário já tem um estado registrado
     if (!userInteractions[From]) {
-        userInteractions[From] = { hasInteracted: true }; // Marca o usuário como interagido
+        userInteractions[From] = { hasInteracted: true, isTransferredToHuman: false };
         responseMessage = `
 🌟 **Menu Principal** 🌟
 
@@ -61,24 +61,17 @@ Por favor, escolha uma das opções abaixo:
     } else {
         const userInteraction = userInteractions[From];
         
-        // Verifica se o usuário já interagiu antes
-        if (!userInteraction.hasInteracted) {
-            userInteraction.hasInteracted = true;
+        // Se o usuário foi transferido para atendimento humano, não envia respostas automáticas
+        if (userInteraction.isTransferredToHuman) {
             responseMessage = `
-🌟 **Menu Principal** 🌟
-
-Por favor, escolha uma das opções abaixo:
-
-1️⃣ **Opção 1**: Descrição breve da Opção 1.
-2️⃣ **Opção 2**: Descrição breve da Opção 2.
-3️⃣ **Opção 3**: Descrição breve da Opção 3.
+Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
 
 🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
 
 ❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
             `;
         } else {
-            // Processa a resposta do usuário
+            // Verifica e processa a mensagem do usuário
             switch (Body) {
                 case '1':
                     responseMessage = 'Você escolheu a Opção 1!';
@@ -107,6 +100,17 @@ Por favor, escolha uma das opções abaixo:
                 case 'ajuda':
                     responseMessage = 'Para ajuda, entre em contato com o suporte.';
                     break;
+                case 'transferir':
+                    // Marca o usuário como transferido para atendimento humano
+                    userInteraction.isTransferredToHuman = true;
+                    responseMessage = `
+Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
+
+🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
+
+❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
+                    `;
+                    break;
                 default:
                     responseMessage = `
 ❌ Opção inválida. Por favor, escolha 1, 2 ou 3.
@@ -130,7 +134,9 @@ Por favor, escolha uma das opções abaixo:
 
 exports.sendManualMessage = async (req, res) => {
     console.log("Mensagem manual", req.body);
+
     const { message, To } = req.body;
+    userInteractions[To] = { hasInteracted: true, isTransferredToHuman: true };
     console.log("cheguei");
     
     let responseMessage = message;
