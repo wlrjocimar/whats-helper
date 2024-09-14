@@ -11,7 +11,7 @@ exports.sendMenu = async (req, res) => {
 };
 
 exports.receiveMessage = async (req, res) => {
-    const { Body, From } = req.body;
+    const { Body, to } = req.body;
     console.log("cheguei")
     let responseMessage = '';
     
@@ -30,7 +30,7 @@ exports.receiveMessage = async (req, res) => {
     }
 
     try {
-        await messageService.processMessage(responseMessage, From);
+        await messageService.processMessage(responseMessage, to);
         res.status(200).send('Resposta processada com sucesso!');
     } catch (error) {
         res.status(500).send(error.message);
