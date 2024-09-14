@@ -52,7 +52,12 @@ exports.receiveMessage = async (req, res) => {
                     responseMessage = 'Você escolheu a Opção 3!';
                     break;
                 default:
-                    responseMessage = 'Opção inválida. Por favor, escolha 1, 2 ou 3.';
+                    responseMessage = 'Opção inválida. Por favor, escolha 1, 2 ou 3.\n\nDigite "menu" para retornar ao menu principal.';
+            }
+
+            // Se a resposta for "menu", enviar o menu novamente
+            if (Body.toLowerCase() === 'menu') {
+                responseMessage = 'Obrigado por entrar em contato! Por favor, escolha uma das opções abaixo:\n1. Opção 1\n2. Opção 2\n3. Opção 3';
             }
         }
     }
