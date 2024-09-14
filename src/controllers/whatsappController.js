@@ -48,9 +48,12 @@ exports.receiveMessage = async (req, res) => {
     const userInteraction = userInteractions[From];
     let responseMessage = '';
 
-    // Se o usuário foi transferido para atendimento humano, não envia respostas automáticas
-    if (userInteraction.isTransferredToHuman==1) {
-        userInteractions[From] = { hasInteracted: true, isTransferredToHuman: 2 };
+    // Se o usuário foi transferido para atendimento humano
+    if (userInteraction.isTransferredToHuman === 2) {
+        // Se o usuário já foi transferido e notificado, não enviar mais mensagens automáticas
+        responseMessage = null;
+    } else if (userInteraction.isTransferredToHuman === 1) {
+        // Se o usuário foi recentemente transferido e precisa ser notificado
         responseMessage = `
 Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
 
@@ -58,6 +61,8 @@ Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um a
 
 ❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
         `;
+        // Marca como transferido e notificado
+        userInteraction.isTransferredToHuman = 2;
     } else {
         // Se o usuário ainda não interagiu ou se está interagindo pela primeira vez
         if (!userInteraction.hasInteracted) {
@@ -107,7 +112,7 @@ Por favor, escolha uma das opções abaixo:
                     break;
                 case 'transferir':
                     // Marca o usuário como transferido para atendimento humano
-                    userInteraction.isTransferredToHuman = 2;
+                    userInteraction.isTransferredToHuman = 1;
                     responseMessage = `
 Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
 
@@ -138,18 +143,17 @@ Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um a
     }
 };
 
-
-
 exports.sendManualMessage = async (req, res) => {
     console.log("Mensagem manual", req.body);
 
     const { message, To } = req.body;
-    userInteractions[To] = { hasInteracted: true, isTransferredToHuman: 2 };
-    console.log("cheguei");
+    if (!userInteractions[To]) {
+        userInteractions[To] = { hasInteracted: true, isTransferredToHuman: 2 };
+    } else {
+        userInteractions[To].isTransferredToHuman = 2;
+    }
     
     let responseMessage = message;
-
-    
 
     try {
         await messageService.processMessage(responseMessage, To);
