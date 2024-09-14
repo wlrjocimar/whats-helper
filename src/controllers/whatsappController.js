@@ -27,7 +27,7 @@ Por favor, escolha uma das opções abaixo:
         await messageService.processMessage(menuMessage, to);
         // Inicializa o estado do usuário
         if (!userInteractions[to]) {
-            userInteractions[to] = { hasInteracted: false, isTransferredToHuman: false };
+            userInteractions[to] = { hasInteracted: false, isTransferredToHuman: 0 };
         }
         res.status(200).send('Menu enviado com sucesso!');
     } catch (error) {
