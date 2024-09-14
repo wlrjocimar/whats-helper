@@ -107,7 +107,7 @@ Por favor, escolha uma das opções abaixo:
                     break;
                 case 'transferir':
                     // Marca o usuário como transferido para atendimento humano
-                    userInteraction.isTransferredToHuman = true;
+                    userInteraction.isTransferredToHuman = 2;
                     responseMessage = `
 Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
 
