@@ -24,7 +24,7 @@ Por favor, escolha uma das opções abaixo:
 
     try {
         // Envia o menu estilizado para o usuário
-        await messageService.sendMessage(to, menuMessage);
+        await messageService.processMessage(to, menuMessage);
         // Inicializa o estado do usuário
         if (!userInteractions[to]) {
             userInteractions[to] = { hasInteracted: false };
