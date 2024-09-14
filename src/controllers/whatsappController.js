@@ -11,7 +11,7 @@ exports.sendMenu = async (req, res) => {
 };
 
 exports.receiveMessage = async (req, res) => {
-    console.log("Dados do request*******",req.body)
+    console.log("Dados do request*******",req)
     const { Body, to } = req.body;
     console.log("cheguei")
     let responseMessage = '';
