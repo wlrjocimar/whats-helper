@@ -287,6 +287,7 @@ exports.receiveMessage = async (req, res) => {
             //const transcription = await transcribeAudio(convertedFilePath);
             const transcription = await transcribeAudioWithAssemblyAI(convertedFilePath);
             console.log('Transcrição do áudio:', transcription);
+            Body=transcription;
 
         } catch (error) {
             console.error('Erro ao transcrever o áudio:', error);
