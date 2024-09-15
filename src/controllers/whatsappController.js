@@ -72,6 +72,8 @@ async function convertAudio(inputPath, outputPath) {
     });
 }
 
+
+//funcao para transcrever o audio
 async function transcribeAudio(filePath) {
     const file = fs.readFileSync(filePath);
     const audioBytes = file.toString('base64');
