@@ -350,7 +350,10 @@ Por favor, escolha uma das opções abaixo:
                 `;
             } else {
                 // Processa a resposta do usuário
-                switch (Body.toLowerCase()) {
+                const optionMatch = Body.toLowerCase().match(/opção\s*(\d+)/);
+                if (optionMatch) {
+                    const option = optionMatch[1];
+                switch (option) {
                     case '1':
                         responseMessage = 'Você escolheu a Opção 1!';
                         break;
@@ -401,6 +404,7 @@ Por favor, escolha uma das opções abaixo:
                 }
                 
             }
+        }
         }
     }
 
