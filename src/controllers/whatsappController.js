@@ -75,7 +75,7 @@ async function convertAudio(inputPath, outputPath) {
 
 // Função para transcrever áudio usando AssemblyAI
 // Função para transcrever áudio usando AssemblyAI
-async function transcribeAudioWithAssemblyAI(filePath, languageCode = 'pt-BR') {
+async function transcribeAudioWithAssemblyAI(filePath, languageCode = 'pt') {
     try {
         // Lê o áudio e faz o upload para AssemblyAI
         const file = fs.readFileSync(filePath);
