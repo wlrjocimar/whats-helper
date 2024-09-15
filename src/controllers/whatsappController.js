@@ -77,36 +77,32 @@ async function convertAudio(inputPath, outputPath) {
 
 
     async function quickstart() {
-        // Lê o arquivo de áudio local
-        const file = fs.readFileSync('converted_audio.flac');
-      
-        // Define o conteúdo do áudio como base64
-        const audio = {
-          content: file.toString('base64'),  // Converte o áudio para base64
-        };
-      
-        // Configuração para o arquivo FLAC
-        const config = {
-          encoding: 'LINEAR16',  // Define o formato do arquivo de áudio
-          sampleRateHertz: 16000,  // Taxa de amostragem (ajuste se necessário)
-          languageCode: 'en-US',  // Código de idioma (ajuste conforme necessário)
-        };
-      
-        const request = {
-          audio: audio,
-          config: config,
-        };
-      
-        try {
-          // Detecta fala no arquivo de áudio
-          const [response] = await client.recognize(request);
-          const transcription = response.results
-            .map(result => result.alternatives[0].transcript)
-            .join('\n');
-          console.log(`Transcription: ${transcription}`);
-        } catch (error) {
-          console.log('Erro ao transcrever:', error);
-        }
+        // Ler o conteúdo do arquivo WAV e converter para base64
+  const audioContent = fs.readFileSync('converted_audio.wav').toString('base64');
+
+  const audio = {
+    content: audioContent,
+  };
+  const config = {
+    encoding: 'LINEAR16',
+    sampleRateHertz: 16000,
+    languageCode: 'en-US',
+  };
+  const request = {
+    audio: audio,
+    config: config,
+  };
+
+  try {
+    // Detecta fala no arquivo de áudio
+    const [response] = await client.recognize(request);
+    const transcription = response.results
+      .map(result => result.alternatives[0].transcript)
+      .join('\n');
+    console.log(`Transcription: ${transcription}`);
+  } catch (error) {
+    console.error('Erro ao transcrever:', error);
+  }
   }
   
 
