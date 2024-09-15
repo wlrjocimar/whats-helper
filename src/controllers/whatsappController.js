@@ -3,7 +3,20 @@ const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
 const speech = require('@google-cloud/speech');
-const client = new speech.SpeechClient();
+require('dotenv').config();
+const { GoogleAuth } = require('google-auth-library');
+
+const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+
+const auth = new GoogleAuth({
+  credentials: credentials,
+  projectId: credentials.project_id,
+});
+// Criar o cliente do Speech com as credenciais fornecidas
+const client = new speech.SpeechClient({
+    credentials: credentials,
+    projectId: credentials.project_id,
+  });
 
 // Estrutura de dados em memória para gerenciar o estado dos usuários
 const userInteractions = {};
