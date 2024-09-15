@@ -368,7 +368,7 @@ Por favor, escolha uma das opções abaixo:
                         return null;
                     }
                 
-            }
+            
         };
 
         const option = detectOption(Body);
