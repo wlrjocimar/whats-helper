@@ -5,7 +5,7 @@ const path = require('path');
 
 // Estrutura de dados em memória para gerenciar o estado dos usuários
 const userInteractions = {};
-const INACTIVITY_TIMEOUT = 600 * 1000; // 1h  em milissegundos
+const INACTIVITY_TIMEOUT = 60 * 60000; // 1h  em milissegundos
 
 // Função para gerar QR Code com opções de configuração
 async function generateQRCode(text) {
