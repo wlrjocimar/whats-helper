@@ -18,14 +18,11 @@ const auth = new GoogleAuth({
   credentials: credentials,
   projectId: credentials.project_id,
 });
-// // Criar o cliente do Speech com as credenciais fornecidas
-// const client = new speech.SpeechClient({
-//     credentials: credentials,
-//     projectId: credentials.project_id,
-//   });
-
-// Instancia o cliente de transcrição
-const client = new speech.SpeechClient();
+// Criar o cliente do Speech com as credenciais fornecidas
+const client = new speech.SpeechClient({
+    credentials: credentials,
+    projectId: credentials.project_id,
+  });
 
 // Estrutura de dados em memória para gerenciar o estado dos usuários
 const userInteractions = {};
