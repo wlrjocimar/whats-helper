@@ -23,11 +23,27 @@ async function generateQRCode(text) {
 }
 
 // Função para reiniciar o atendimento se o usuário estiver inativo
-function resetUserInteraction(userId) {
+async function resetUserInteraction(userId) {
     if (userInteractions[userId]) {
+        // Envia uma mensagem informando que o atendimento foi encerrado
+        const endOfSessionMessage = `
+O atendimento foi encerrado devido à inatividade.
+
+🔄 Se você precisar de assistência, por favor, inicie uma nova conversa.
+
+❓ Se tiver dúvidas ou precisar de ajuda, entre em contato com o suporte.
+        `;
+        try {
+            await messageService.processMessage(endOfSessionMessage, userId);
+        } catch (error) {
+            console.error('Erro ao enviar mensagem de encerramento:', error.message);
+        }
+
+        // Reseta o estado do usuário
         userInteractions[userId] = { hasInteracted: false, isTransferredToHuman: 0 };
     }
 }
+
 
 exports.sendMenu = async (req, res) => {
     const { to } = req.body;
