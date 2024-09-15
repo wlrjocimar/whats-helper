@@ -68,7 +68,7 @@ async function convertAudio(inputPath, outputPath) {
                 console.error('Erro na conversão de áudio:', err);
                 reject(err);
             })
-            .save(uniqueOutputPath); // Salva o arquivo com um nome único
+            .save(outputPath); 
     });
 }
 
