@@ -72,34 +72,33 @@ async function convertAudio(inputPath, outputPath) {
 }
 
 // Função para transcrever o áudio
-async function transcribeAudio(audioUrl) {
-    // Converta o áudio, se necessário
-    const convertedAudioPath = await convertAudio(audioUrl, 'converted_audio.flac');
-  
-    const audio = {
-      content: fs.readFileSync(convertedAudioPath).toString('base64'),
-    };
-    const config = {
-      encoding: 'FLAC', // Ou 'WAV' se você estiver usando esse formato
-      sampleRateHertz: 16000,
-      languageCode: 'pt-BR',
-    };
+async function transcribeAudio(filePath) {
+    const file = fs.readFileSync(filePath);
+    const audioBytes = file.toString('base64');
+
     const request = {
-      audio: audio,
-      config: config,
+        audio: {
+            content: audioBytes,
+        },
+        config: {
+            encoding: 'FLAC', // Ou 'LINEAR16', dependendo do formato
+            sampleRateHertz: 44100,
+            languageCode: 'pt-BR',
+        },
     };
-  
+
     try {
-      const [response] = await client.recognize(request);
-      const transcription = response.results
-        .map(result => result.alternatives[0].transcript)
-        .join('\n');
-      return transcription;
+        const [response] = await client.recognize(request);
+        const transcription = response.results
+            .map(result => result.alternatives[0].transcript)
+            .join('\n');
+        console.log(`Transcrição: ${transcription}`);
+        return transcription;
     } catch (error) {
-      console.error('Erro ao transcrever o áudio:', error);
-      throw new Error('Erro ao transcrever o áudio');
+        console.error('Erro ao transcrever o áudio:', error);
+        throw error;
     }
-  }
+}
 
 
 
