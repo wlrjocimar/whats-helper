@@ -172,7 +172,7 @@ Por favor, escolha uma das opções abaixo:
                 `;
             } else {
                 // Processa a resposta do usuário
-                switch (Body) {
+                switch (Body.toLowerCase()) {
                     case '1':
                         responseMessage = 'Você escolheu a Opção 1!';
                         break;
@@ -182,44 +182,46 @@ Por favor, escolha uma das opções abaixo:
                     case '3':
                         responseMessage = 'Você escolheu a Opção 3!';
                         break;
-                    case 'menu':
-                        responseMessage = `
-🌟 **Menu Principal** 🌟
-
-Por favor, escolha uma das opções abaixo:
-
-1️⃣ **Opção 1**: Descrição breve da Opção 1.
-2️⃣ **Opção 2**: Descrição breve da Opção 2.
-3️⃣ **Opção 3**: Descrição breve da Opção 3.
-
-🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
-
-❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
-                        `;
-                        break;
                     case 'ajuda':
                         responseMessage = 'Para ajuda, entre em contato com o suporte.';
                         break;
                     case 'transferir':
-                        // Marca o usuário como transferido para atendimento humano
                         userInteraction.isTransferredToHuman = 1;
                         responseMessage = `
-Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
-
-🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
-
-❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
+                Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
+                
+                🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
+                
+                ❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
                         `;
                         break;
                     default:
-                        responseMessage = `
-❌ Opção inválida. Por favor, escolha 1, 2 ou 3.
-
-🔄 Para retornar ao menu principal, digite *menu*.
-
-❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
-                        `;
+                        // Usando expressão regular para capturar variações de "menu"
+                        if (/m?e?n?u?/i.test(Body)) {
+                            responseMessage = `
+                🌟 **Menu Principal** 🌟
+                
+                Por favor, escolha uma das opções abaixo:
+                
+                1️⃣ **Opção 1**: Descrição breve da Opção 1.
+                2️⃣ **Opção 2**: Descrição breve da Opção 2.
+                3️⃣ **Opção 3**: Descrição breve da Opção 3.
+                
+                🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
+                
+                ❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
+                            `;
+                        } else {
+                            responseMessage = `
+                ❌ Opção inválida. Por favor, escolha 1, 2 ou 3.
+                
+                🔄 Para retornar ao menu principal, digite *menu*.
+                
+                ❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
+                            `;
+                        }
                 }
+                
             }
         }
     }
