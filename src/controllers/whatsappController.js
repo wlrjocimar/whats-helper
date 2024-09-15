@@ -197,7 +197,7 @@ Por favor, escolha uma das opções abaixo:
                         break;
                     default:
                         // Usando expressão regular para capturar variações de "menu"
-                        if (/m?e?n?u?/i.test(Body)) {
+                        if (/^m[e3]n?u$/i.test(Body)) {
                             responseMessage = `
                 🌟 **Menu Principal** 🌟
                 
