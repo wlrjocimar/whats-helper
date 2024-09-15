@@ -72,7 +72,6 @@ async function convertAudio(inputPath, outputPath) {
     });
 }
 
-// Função para transcrever o áudio
 async function transcribeAudio(filePath) {
     const file = fs.readFileSync(filePath);
     const audioBytes = file.toString('base64');
@@ -83,7 +82,7 @@ async function transcribeAudio(filePath) {
         },
         config: {
             encoding: 'FLAC', // Ou 'LINEAR16', dependendo do formato
-            sampleRateHertz: 44100,
+            sampleRateHertz: 16000, // Atualizado para 16 kHz
             languageCode: 'pt-BR',
         },
     };
