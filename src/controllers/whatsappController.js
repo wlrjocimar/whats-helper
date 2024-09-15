@@ -87,7 +87,7 @@ async function convertAudio(inputPath, outputPath) {
       
         // Configuração para o arquivo FLAC
         const config = {
-          encoding: 'FLAC',  // Define o formato do arquivo de áudio
+          encoding: 'LINEAR16',  // Define o formato do arquivo de áudio
           sampleRateHertz: 16000,  // Taxa de amostragem (ajuste se necessário)
           languageCode: 'en-US',  // Código de idioma (ajuste conforme necessário)
         };
