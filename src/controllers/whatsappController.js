@@ -55,9 +55,10 @@ async function convertAudio(inputPath, outputPath) {
     return new Promise((resolve, reject) => {
         // Cria um nome único para o arquivo de saída para evitar conflitos
         const uniqueOutputPath = `${outputPath}_${Date.now()}.flac`;
-        
+
         ffmpeg(inputPath)
             .audioCodec('flac') // Ou 'wav' se preferir
+            .audioFilters('aformat=sample_fmts=s16:sample_rates=16000') // Define taxa de amostragem e formato
             .toFormat('flac') // Ou 'wav'
             .on('end', () => {
                 console.log('Conversão de áudio concluída');
