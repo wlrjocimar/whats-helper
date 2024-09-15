@@ -53,8 +53,8 @@ async function downloadMedia(mediaUrl, outputPath) {
 //converter o audio para formato aceito pelo google
 async function convertAudio(inputPath, outputPath) {
     return new Promise((resolve, reject) => {
-        // Cria um nome único para o arquivo de saída para evitar conflitos
-        const uniqueOutputPath = `${outputPath}_${Date.now()}.flac`;
+        
+        
 
         ffmpeg(inputPath)
             .audioCodec('flac') // Ou 'wav' se preferir
@@ -62,7 +62,7 @@ async function convertAudio(inputPath, outputPath) {
             .toFormat('flac') // Ou 'wav'
             .on('end', () => {
                 console.log('Conversão de áudio concluída');
-                resolve(uniqueOutputPath);
+                resolve(outputPath);
             })
             .on('error', (err) => {
                 console.error('Erro na conversão de áudio:', err);
@@ -198,7 +198,7 @@ exports.receiveMessage = async (req, res) => {
           const convertedFilePath = await convertAudio(downloadedFilePath, 'converted_audio.flac');
       
             // Transcrever o áudio
-            const transcription = await transcribeAudio("output.flac");
+            const transcription = await transcribeAudio(convertedFilePath);
       console.log('Transcrição do áudio:', transcription);
 
         } catch (error) {
