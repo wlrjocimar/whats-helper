@@ -97,8 +97,9 @@ Por favor, escolha uma das opções abaixo:
 
 exports.receiveMessage = async (req, res) => {
     console.log("Dados do request*******", req.body);
-    const { Body, From, ProfileName } = req.body;
+    const { Body, From, ProfileName , MessageType,MediaUrl0 } = req.body;
     const userName=ProfileName;
+    
 
     console.log("Usuario *********", userName);
 
@@ -116,6 +117,25 @@ exports.receiveMessage = async (req, res) => {
 
     const userInteraction = userInteractions[From];
     let responseMessage = '';
+
+    // Verifica se a mensagem recebida é um áudio
+    if (MessageType === 'audio') {
+        
+
+        try {
+            // Transcrever o áudio para texto
+            const transcription = await transcribeAudio(MediaUrl0);
+            console.log('Transcrição do áudio:', transcription);
+
+            // Use a transcrição como o `Body` para processar a resposta
+            responseMessage = `Você disse: ${transcription}`;
+
+        } catch (error) {
+            console.error('Erro ao transcrever o áudio:', error);
+            responseMessage = 'Desculpe, não consegui entender o áudio. Por favor, tente novamente.';
+        }
+    }
+
 
     // Verifica se o usuário foi inativo por mais de 1hora 
     if (Date.now() - userInteraction.lastInteraction > INACTIVITY_TIMEOUT) {
