@@ -52,6 +52,7 @@ async function downloadMedia(mediaUrl, outputPath) {
 
 //converter o audio para formato aceito pelo google
 async function convertAudio(inputPath, outputPath) {
+
     return new Promise((resolve, reject) => {
         ffmpeg(inputPath)
             .audioCodec('flac') // Ou 'wav' se preferir
@@ -70,6 +71,33 @@ async function convertAudio(inputPath, outputPath) {
 }
 
 
+
+async function quickstart() {
+    // The path to the remote LINEAR16 file
+    const gcsUri = 'gs://cloud-samples-data/speech/brooklyn_bridge.raw';
+  
+    // The audio file's encoding, sample rate in hertz, and BCP-47 language code
+    const audio = {
+      uri: gcsUri,
+    };
+    const config = {
+      encoding: 'LINEAR16',
+      sampleRateHertz: 16000,
+      languageCode: 'en-US',
+    };
+    const request = {
+      audio: audio,
+      config: config,
+    };
+  
+    // Detects speech in the audio file
+    const [response] = await client.recognize(request);
+    const transcription = response.results
+      .map(result => result.alternatives[0].transcript)
+      .join('\n');
+    console.log(`Transcription: ${transcription}`);
+  }
+  
 
 //funcao para transcrever o audio
 async function transcribeAudio(filePath) {
@@ -104,17 +132,18 @@ async function transcribeAudio(filePath) {
 
 // Função para gerar QR Code com opções de configuração
 async function generateQRCode(text) {
-    try {
-        // Gera o QR code em formato ASCII com configurações ajustadas
-        const qrCodeASCII = await QRCode.toString(text, {
-            type: 'terminal',
-            errorCorrectionLevel: 'L', // Nível de correção de erro baixo
-            scale: 1 // Ajuste a escala para reduzir o tamanho
-        });
-        return qrCodeASCII;
-    } catch (error) {
-        throw new Error('Erro ao gerar o QR Code: ' + error.message);
-    }
+   await quickstart();
+    // try {
+    //     // Gera o QR code em formato ASCII com configurações ajustadas
+    //     const qrCodeASCII = await QRCode.toString(text, {
+    //         type: 'terminal',
+    //         errorCorrectionLevel: 'L', // Nível de correção de erro baixo
+    //         scale: 1 // Ajuste a escala para reduzir o tamanho
+    //     });
+    //     return qrCodeASCII;
+    // } catch (error) {
+    //     throw new Error('Erro ao gerar o QR Code: ' + error.message);
+    // }
 }
 
 // Função para reiniciar o atendimento se o usuário estiver inativo
