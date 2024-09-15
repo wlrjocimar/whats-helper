@@ -70,8 +70,8 @@ Por favor, escolha uma das opções abaixo:
 
 exports.receiveMessage = async (req, res) => {
     console.log("Dados do request*******", req.body);
-    const { Body, From } = req.body;
-    const userName=req.ProfileName;
+    const { Body, From, ProfileName } = req.body;
+    const userName=ProfileName;
 
     console.log("Usuario *********", userName);
 
