@@ -44,6 +44,7 @@ async function downloadMedia(mediaUrl, outputPath) {
         response.data.on('end', () => resolve(outputPath));
         response.data.on('error', (err) => reject(err));
       });
+      console.log("Download do audio ok")
     } catch (error) {
       throw new Error('Erro ao baixar o arquivo de mídia: ' + error.message);
     }
@@ -56,8 +57,9 @@ async function convertAudio(inputUrl, outputPath) {
         .audioCodec('flac') // Ou 'wav' se preferir
         .toFormat('flac') // Ou 'wav'
         .on('end', () => {
-          console.log('Conversão de áudio concluída');
+          
           resolve(outputPath);
+          console.log('Conversão de áudio concluída');
         })
         .on('error', (err) => {
           console.error('Erro na conversão de áudio:', err);
