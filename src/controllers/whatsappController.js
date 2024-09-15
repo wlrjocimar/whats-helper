@@ -72,7 +72,8 @@ exports.receiveMessage = async (req, res) => {
     console.log("Dados do request*******", req.body);
     const { Body, From } = req.body;
     const userName=req.ProfileName;
-    console.log("cheguei");
+
+    console.log("Usuario *********", userName);
 
     // Verifica se o usuário já tem um estado registrado
     if (!userInteractions[From]) {
