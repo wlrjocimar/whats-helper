@@ -53,9 +53,6 @@ async function downloadMedia(mediaUrl, outputPath) {
 //converter o audio para formato aceito pelo google
 async function convertAudio(inputPath, outputPath) {
     return new Promise((resolve, reject) => {
-        
-        
-
         ffmpeg(inputPath)
             .audioCodec('flac') // Ou 'wav' se preferir
             .audioFilters('aformat=sample_fmts=s16:sample_rates=16000') // Define taxa de amostragem e formato
@@ -71,6 +68,7 @@ async function convertAudio(inputPath, outputPath) {
             .save(outputPath); 
     });
 }
+
 
 
 //funcao para transcrever o audio
@@ -103,7 +101,6 @@ async function transcribeAudio(filePath) {
         throw error;
     }
 }
-
 
 // Função para gerar QR Code com opções de configuração
 async function generateQRCode(text) {
