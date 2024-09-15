@@ -15,14 +15,14 @@ grpc.setLogger(console);
 const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
 
 const auth = new GoogleAuth({
-  credentials: credentials,
-  projectId: credentials.project_id,
+    credentials: credentials,
+    projectId: credentials.project_id,
 });
 // Criar o cliente do Speech com as credenciais fornecidas
 const client = new speech.SpeechClient({
     credentials: credentials,
     projectId: credentials.project_id,
-  });
+});
 
 // Estrutura de dados em memória para gerenciar o estado dos usuários
 const userInteractions = {};
@@ -32,26 +32,26 @@ const INACTIVITY_TIMEOUT = 60 * 60 * 1000; // 1 hora em milissegundos
 //download do audio que foi para a twilio
 async function downloadMedia(mediaUrl, outputPath) {
     try {
-      const response = await axios({
-        url: mediaUrl,
-        method: 'GET',
-        responseType: 'stream',
-        auth: {
-          username: process.env.TWILIO_ACCOUNT_SID,
-          password: process.env.TWILIO_AUTH_TOKEN
-        }
-      });
-  
-      response.data.pipe(fs.createWriteStream(outputPath));
-      return new Promise((resolve, reject) => {
-        response.data.on('end', () => resolve(outputPath));
-        response.data.on('error', (err) => reject(err));
-      });
-      console.log("Download do audio ok")
+        const response = await axios({
+            url: mediaUrl,
+            method: 'GET',
+            responseType: 'stream',
+            auth: {
+                username: process.env.TWILIO_ACCOUNT_SID,
+                password: process.env.TWILIO_AUTH_TOKEN
+            }
+        });
+
+        response.data.pipe(fs.createWriteStream(outputPath));
+        return new Promise((resolve, reject) => {
+            response.data.on('end', () => resolve(outputPath));
+            response.data.on('error', (err) => reject(err));
+        });
+        console.log("Download do audio ok")
     } catch (error) {
-      throw new Error('Erro ao baixar o arquivo de mídia: ' + error.message);
+        throw new Error('Erro ao baixar o arquivo de mídia: ' + error.message);
     }
-  }
+}
 
 //converter o audio para formato aceito pelo google
 async function convertAudio(inputPath, outputPath) {
@@ -69,7 +69,7 @@ async function convertAudio(inputPath, outputPath) {
                 console.error('Erro na conversão de áudio:', err);
                 reject(err);
             })
-            .save(outputPath); 
+            .save(outputPath);
     });
 }
 
@@ -126,35 +126,35 @@ async function transcribeAudioWithAssemblyAI(filePath, languageCode = 'pt') {
 }
 
 
-    async function quickstart() {
-        // Ler o conteúdo do arquivo WAV e converter para base64
-  const audioContent = fs.readFileSync('converted_audio.wav').toString('base64');
+async function quickstart() {
+    // Ler o conteúdo do arquivo WAV e converter para base64
+    const audioContent = fs.readFileSync('converted_audio.wav').toString('base64');
 
-  const audio = {
-    content: audioContent,
-  };
-  const config = {
-    encoding: 'LINEAR16',
-    sampleRateHertz: 16000,
-    languageCode: 'en-US',
-  };
-  const request = {
-    audio: audio,
-    config: config,
-  };
+    const audio = {
+        content: audioContent,
+    };
+    const config = {
+        encoding: 'LINEAR16',
+        sampleRateHertz: 16000,
+        languageCode: 'en-US',
+    };
+    const request = {
+        audio: audio,
+        config: config,
+    };
 
-  try {
-    // Detecta fala no arquivo de áudio
-    const [response] = await client.recognize(request);
-    const transcription = response.results
-      .map(result => result.alternatives[0].transcript)
-      .join('\n');
-    console.log(`Transcription: ${transcription}`);
-  } catch (error) {
-    console.error('Erro ao transcrever:', error);
-  }
-  }
-  
+    try {
+        // Detecta fala no arquivo de áudio
+        const [response] = await client.recognize(request);
+        const transcription = response.results
+            .map(result => result.alternatives[0].transcript)
+            .join('\n');
+        console.log(`Transcription: ${transcription}`);
+    } catch (error) {
+        console.error('Erro ao transcrever:', error);
+    }
+}
+
 
 //funcao para transcrever o audio
 async function transcribeAudio(filePath) {
@@ -189,7 +189,7 @@ async function transcribeAudio(filePath) {
 
 // Função para gerar QR Code com opções de configuração
 async function generateQRCode(text) {
-   await quickstart();
+    await quickstart();
     // try {
     //     // Gera o QR code em formato ASCII com configurações ajustadas
     //     const qrCodeASCII = await QRCode.toString(text, {
@@ -234,8 +234,8 @@ Por favor, escolha uma das opções abaixo:
         await messageService.processMessage(menuMessage, to);
         // Inicializa o estado do usuário
         if (!userInteractions[to]) {
-            userInteractions[to] = { 
-                hasInteracted: false, 
+            userInteractions[to] = {
+                hasInteracted: false,
                 isTransferredToHuman: 0,
                 lastInteraction: Date.now() // Adiciona timestamp da última interação
             };
@@ -251,16 +251,16 @@ Por favor, escolha uma das opções abaixo:
 
 exports.receiveMessage = async (req, res) => {
     console.log("Dados do request*******", req.body);
-    const { Body, From, ProfileName , MessageType,MediaUrl0 } = req.body;
-    const userName=ProfileName;
-    
+    const { Body, From, ProfileName, MessageType, MediaUrl0 } = req.body;
+    const userName = ProfileName;
+
 
     console.log("Usuario *********", userName);
 
     // Verifica se o usuário já tem um estado registrado
     if (!userInteractions[From]) {
-        userInteractions[From] = { 
-            hasInteracted: false, 
+        userInteractions[From] = {
+            hasInteracted: false,
             isTransferredToHuman: 0,
             lastInteraction: Date.now() // Adiciona timestamp da última interação
         };
@@ -274,19 +274,19 @@ exports.receiveMessage = async (req, res) => {
 
     // Verifica se a mensagem recebida é um áudio
     if (MessageType === 'audio') {
-        
+
 
         try {
             // Baixar o arquivo de mídia
             const downloadedFilePath = await downloadMedia(MediaUrl0, 'downloaded_audio.mp3');
-      
-          // Converter o áudio
-          const convertedFilePath = await convertAudio(downloadedFilePath, 'converted_audio.flac');
-      
+
+            // Converter o áudio
+            const convertedFilePath = await convertAudio(downloadedFilePath, 'converted_audio.flac');
+
             // Transcrever o áudio
             //const transcription = await transcribeAudio(convertedFilePath);
             const transcription = await transcribeAudioWithAssemblyAI(convertedFilePath);
-      console.log('Transcrição do áudio:', transcription);
+            console.log('Transcrição do áudio:', transcription);
 
         } catch (error) {
             console.error('Erro ao transcrever o áudio:', error);
@@ -351,8 +351,33 @@ Por favor, escolha uma das opções abaixo:
             } else {
                 // Processa a resposta do usuário
                 const optionMatch = Body.toLowerCase().match(/opção\s*(\d+)/);
-                if (optionMatch) {
-                    const option = optionMatch[1];
+                const lowerCaseBody = Body.toLowerCase();
+
+                // Mapeamento de palavras-chave para opções
+                const optionKeywords = {
+                    '1': ['1', 'escolho 1', 'eu quero 1', 'opção 1', 'opção um'],
+                    '2': ['2', 'escolho 2', 'eu quero 2', 'opção 2', 'opção dois'],
+                    '3': ['3', 'escolho 3', 'eu quero 3', 'opção 3', 'opção três'],
+                    'ajuda': ['ajuda', 'preciso de ajuda', 'me ajude', 'suporte'],
+                    'transferir': ['transferir', 'falar com um humano', 'suporte humano']
+                };
+
+                // Função para encontrar a opção correspondente
+                const findOption = (text) => {
+                    for (const [option, keywords] of Object.entries(optionKeywords)) {
+                        for (const keyword of keywords) {
+                            if (text.includes(keyword)) {
+                                return option;
+                            }
+                        }
+                    }
+                    return 'não reconhecido';
+                };
+
+
+                // Encontre a opção baseada na entrada do usuário
+                const option = findOption(lowerCaseBody);
+
                 switch (option) {
                     case '1':
                         responseMessage = 'Você escolheu a Opção 1!';
@@ -402,9 +427,9 @@ Por favor, escolha uma das opções abaixo:
                             `;
                         }
                 }
-                
+
+
             }
-        }
         }
     }
 
@@ -427,7 +452,7 @@ exports.sendManualMessage = async (req, res) => {
     } else {
         userInteractions[To].isTransferredToHuman = 2;
     }
-    
+
     let responseMessage = message;
 
     try {
