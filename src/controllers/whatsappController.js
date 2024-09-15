@@ -251,7 +251,7 @@ Por favor, escolha uma das opções abaixo:
 
 exports.receiveMessage = async (req, res) => {
     console.log("Dados do request*******", req.body);
-    const { Body, From, ProfileName, MessageType, MediaUrl0 } = req.body;
+    let { Body, From, ProfileName, MessageType, MediaUrl0 } = req.body;
     const userName = ProfileName;
 
 
