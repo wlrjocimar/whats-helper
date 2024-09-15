@@ -287,7 +287,7 @@ exports.receiveMessage = async (req, res) => {
             //const transcription = await transcribeAudio(convertedFilePath);
             const transcription = await transcribeAudioWithAssemblyAI(convertedFilePath);
             console.log('Transcrição do áudio:', transcription);
-            Body=transcription;
+            Body = transcription;
 
         } catch (error) {
             console.error('Erro ao transcrever o áudio:', error);
@@ -351,33 +351,23 @@ Por favor, escolha uma das opções abaixo:
                 `;
             } else {
                 // Processa a resposta do usuário
-                console.log("Resposta do usuario",Body)
-                const lowerCaseBody = Body.toLowerCase();
-
-                // Mapeamento de palavras-chave para opções
-                const optionKeywords = {
-                    '1': ['1', 'escolho 1', 'eu quero 1', 'opção 1', 'opção um'],
-                    '2': ['2', 'escolho 2', 'eu quero 2', 'opção 2', 'opção dois','dois'],
-                    '3': ['3', 'escolho 3', 'eu quero 3', 'opção 3', 'opção três','tres','três'],
-                    'ajuda': ['ajuda', 'preciso de ajuda', 'me ajude', 'suporte'],
-                    'transferir': ['transferir', 'falar com um humano', 'suporte humano']
-                };
-
-                // Função para encontrar a opção correspondente
-                const findOption = (text) => {
-                    for (const [option, keywords] of Object.entries(optionKeywords)) {
-                        for (const keyword of keywords) {
-                            if (text.includes(keyword)) {
-                                return option;
-                            }
-                        }
+                console.log("Resposta do usuario", Body)
+                // Função para verificar opções com base em palavras-chave
+                const detectOption = (text) => {
+                    if (/(\b1\b|\buno\b|\bum\b)/i.test(text)) {
+                        return '1';
+                    } else if (/(\b2\b|\bdois\b)/i.test(text)) {
+                        return '2';
+                    } else if (/(\b3\b|\btres\b)/i.test(text)) {
+                        return '3';
+                    } else {
+                        return null;
                     }
-                    return 'não reconhecido';
                 };
 
+                const option = detectOption(Body);
 
-                // Encontre a opção baseada na entrada do usuário
-                const option = findOption(lowerCaseBody);
+                // Processar a mensagem com base na opção detectada
 
                 switch (option) {
                     case '1':
