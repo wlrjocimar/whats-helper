@@ -5,6 +5,8 @@ const path = require('path');
 const speech = require('@google-cloud/speech');
 require('dotenv').config();
 const { GoogleAuth } = require('google-auth-library');
+const ffmpeg = require('fluent-ffmpeg');
+const axios = require('axios');
 
 const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
 
@@ -22,28 +24,53 @@ const client = new speech.SpeechClient({
 const userInteractions = {};
 const INACTIVITY_TIMEOUT = 60 * 60000; // 1h  em milissegundos
 
+//converter o audio para formato aceito pelo google
+async function convertAudio(inputUrl, outputPath) {
+    return new Promise((resolve, reject) => {
+      ffmpeg(inputUrl)
+        .audioCodec('flac') // Ou 'wav' se preferir
+        .toFormat('flac') // Ou 'wav'
+        .on('end', () => {
+          console.log('Conversão de áudio concluída');
+          resolve(outputPath);
+        })
+        .on('error', (err) => {
+          console.error('Erro na conversão de áudio:', err);
+          reject(err);
+        })
+        .save(outputPath);
+    });
+  }
 
 // Função para transcrever o áudio
 async function transcribeAudio(audioUrl) {
+    // Converta o áudio, se necessário
+    const convertedAudioPath = await convertAudio(audioUrl, 'converted_audio.flac');
+  
     const audio = {
-        uri: audioUrl, // URL do áudio enviado pelo WhatsApp
+      content: fs.readFileSync(convertedAudioPath).toString('base64'),
     };
     const config = {
-        encoding: 'OGG_OPUS', // Formato do áudio que o WhatsApp utiliza para mensagens de voz
-        sampleRateHertz: 16000,
-        languageCode: 'pt-BR', // Definindo para português do Brasil
+      encoding: 'FLAC', // Ou 'WAV' se você estiver usando esse formato
+      sampleRateHertz: 16000,
+      languageCode: 'pt-BR',
     };
     const request = {
-        audio: audio,
-        config: config,
+      audio: audio,
+      config: config,
     };
-
-    const [response] = await client.recognize(request);
-    const transcription = response.results
+  
+    try {
+      const [response] = await client.recognize(request);
+      const transcription = response.results
         .map(result => result.alternatives[0].transcript)
         .join('\n');
-    return transcription;
-}
+      return transcription;
+    } catch (error) {
+      console.error('Erro ao transcrever o áudio:', error);
+      throw new Error('Erro ao transcrever o áudio');
+    }
+  }
 
 
 
