@@ -73,7 +73,57 @@ async function convertAudio(inputPath, outputPath) {
     });
 }
 
+// Função para transcrever áudio usando AssemblyAI
+async function transcribeAudioWithAssemblyAI(filePath) {
+    const file = fs.readFileSync(filePath);
+    const audioBytes = file.toString('base64');
 
+    try {
+        // Primeiro, faça o upload do áudio para AssemblyAI
+        const uploadResponse = await axios.post('https://api.assemblyai.com/v2/upload', file, {
+            headers: {
+                'authorization': process.env.ASSEMBLYAI_API_KEY,
+                'content-type': 'audio/flac', // Ou o tipo de arquivo correto
+            },
+         });
+
+        const audioUrl = uploadResponse.data.upload_url;
+
+        // Inicie a transcrição
+        const transcriptionResponse = await axios.post('https://api.assemblyai.com/v2/transcript', {
+            audio_url: audioUrl
+        }, {
+            headers: {
+                'authorization': process.env.ASSEMBLYAI_API_KEY,
+            },
+        });
+
+        const transcriptionId = transcriptionResponse.data.id;
+
+        // Aguarde a transcrição ser concluída
+        let result;
+        do {
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Atraso de 5 segundos
+            const statusResponse = await axios.get(`https://api.assemblyai.com/v2/transcript/${transcriptionId}`, {
+                headers: {
+                    'authorization': process.env.ASSEMBLYAI_API_KEY,
+                },
+            });
+            result = statusResponse.data;
+        } while (result.status !== 'completed' && result.status !== 'failed');
+
+        if (result.status === 'completed') {
+            const transcription = result.text;
+            console.log(`Transcrição: ${transcription}`);
+            return transcription;
+        } else {
+            throw new Error('Falha na transcrição.');
+        }
+    } catch (error) {
+        console.error('Erro ao transcrever o áudio com AssemblyAI:', error);
+        throw error;
+    }
+}
 
 
     async function quickstart() {
@@ -234,7 +284,8 @@ exports.receiveMessage = async (req, res) => {
           const convertedFilePath = await convertAudio(downloadedFilePath, 'converted_audio.flac');
       
             // Transcrever o áudio
-            const transcription = await transcribeAudio(convertedFilePath);
+            //const transcription = await transcribeAudio(convertedFilePath);
+            const transcription = await transcribeAudioWithAssemblyAI(convertedFilePath);
       console.log('Transcrição do áudio:', transcription);
 
         } catch (error) {
