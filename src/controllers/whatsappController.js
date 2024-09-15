@@ -360,42 +360,48 @@ Por favor, escolha uma das opções abaixo:
                         return '2';
                     } else if (/(\b3\b|\btres\b)/i.test(text)) {
                         return '3';
+                    } else if (/ajuda/i.test(text)) {
+                        return 'ajuda';
+                    } else if (/transferir/i.test(text)) {
+                        return 'transferir';
                     } else {
                         return null;
                     }
-                };
+                
+            }
+        };
 
-                const option = detectOption(Body);
+        const option = detectOption(Body);
 
-                // Processar a mensagem com base na opção detectada
+        // Processar a mensagem com base na opção detectada
 
-                switch (option) {
-                    case '1':
-                        responseMessage = 'Você escolheu a Opção 1!';
-                        break;
-                    case '2':
-                        responseMessage = 'Você escolheu a Opção 2!';
-                        break;
-                    case '3':
-                        responseMessage = 'Você escolheu a Opção 3!';
-                        break;
-                    case 'ajuda':
-                        responseMessage = 'Para ajuda, entre em contato com o suporte.';
-                        break;
-                    case 'transferir':
-                        userInteraction.isTransferredToHuman = 1;
-                        responseMessage = `
+        switch (option) {
+            case '1':
+                responseMessage = 'Você escolheu a Opção 1!';
+                break;
+            case '2':
+                responseMessage = 'Você escolheu a Opção 2!';
+                break;
+            case '3':
+                responseMessage = 'Você escolheu a Opção 3!';
+                break;
+            case 'ajuda':
+                responseMessage = 'Para ajuda, entre em contato com o suporte.';
+                break;
+            case 'transferir':
+                userInteraction.isTransferredToHuman = 1;
+                responseMessage = `
                 Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
                 
                 🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
                 
                 ❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
                         `;
-                        break;
-                    default:
-                        // Usando expressão regular para capturar variações de "menu"
-                        if (/^m[e3]n?u$/i.test(Body)) {
-                            responseMessage = `
+                break;
+            default:
+                // Usando expressão regular para capturar variações de "menu"
+                if (/^m[e3]n?u$/i.test(Body)) {
+                    responseMessage = `
                 🌟 **Menu Principal** 🌟
                 
                 Por favor, escolha uma das opções abaixo:
@@ -408,30 +414,30 @@ Por favor, escolha uma das opções abaixo:
                 
                 ❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
                             `;
-                        } else {
-                            responseMessage = `
+                } else {
+                    responseMessage = `
                 ❌ Opção inválida. Por favor, escolha 1, 2 ou 3.
                 
                 🔄 Para retornar ao menu principal, digite *menu*.
                 
                 ❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
                             `;
-                        }
                 }
-
-
-            }
         }
+
+
+    }
+}
     }
 
-    try {
-        if (responseMessage) {
-            await messageService.processMessage(responseMessage, From);
-        }
-        res.status(200).send('Resposta processada com sucesso!');
-    } catch (error) {
-        res.status(500).send(error.message);
+try {
+    if (responseMessage) {
+        await messageService.processMessage(responseMessage, From);
     }
+    res.status(200).send('Resposta processada com sucesso!');
+} catch (error) {
+    res.status(500).send(error.message);
+}
 };
 
 exports.sendManualMessage = async (req, res) => {
