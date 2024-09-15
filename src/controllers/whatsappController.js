@@ -23,7 +23,7 @@ const client = new speech.SpeechClient({
 
 // Estrutura de dados em memória para gerenciar o estado dos usuários
 const userInteractions = {};
-const INACTIVITY_TIMEOUT = 60 * 60000; // 1h  em milissegundos
+const INACTIVITY_TIMEOUT = 60 * 60 * 1000; // 1 hora em milissegundos
 
 
 //download do audio que foi para a twilio
