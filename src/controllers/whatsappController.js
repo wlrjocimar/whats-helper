@@ -8,6 +8,9 @@ const { GoogleAuth } = require('google-auth-library');
 const ffmpeg = require('fluent-ffmpeg');
 const axios = require('axios');
 const Twilio = require('twilio');
+const grpc = require('@grpc/grpc-js');
+grpc.setLogVerbosity(grpc.logVerbosity.DEBUG);
+grpc.setLogger(console);
 
 const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
 
