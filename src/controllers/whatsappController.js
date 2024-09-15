@@ -71,7 +71,7 @@ Por favor, escolha uma das opções abaixo:
 exports.receiveMessage = async (req, res) => {
     console.log("Dados do request*******", req.body);
     const { Body, From } = req.body;
-    const userName=req.body.ProfileName;
+    const userName=req.ProfileName;
     console.log("cheguei");
 
     // Verifica se o usuário já tem um estado registrado
@@ -93,7 +93,7 @@ exports.receiveMessage = async (req, res) => {
     if (Date.now() - userInteraction.lastInteraction > INACTIVITY_TIMEOUT) {
         resetUserInteraction(From);
         responseMessage = `
-        
+
  Olá    ${userName}  
    
 🌟 **Menu Principal** 🌟
