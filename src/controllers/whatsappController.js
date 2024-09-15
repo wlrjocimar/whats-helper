@@ -51,23 +51,22 @@ async function downloadMedia(mediaUrl, outputPath) {
   }
 
 //converter o audio para formato aceito pelo google
-async function convertAudio(inputUrl, outputPath) {
+async function convertAudio(inputPath, outputPath) {
     return new Promise((resolve, reject) => {
-      ffmpeg(inputUrl)
-        .audioCodec('flac') // Ou 'wav' se preferir
-        .toFormat('flac') // Ou 'wav'
-        .on('end', () => {
-          
-          resolve(outputPath);
-          console.log('Conversão de áudio concluída');
-        })
-        .on('error', (err) => {
-          console.error('Erro na conversão de áudio:', err);
-          reject(err);
-        })
-        .save(outputPath);
+        ffmpeg(inputPath)
+            .audioCodec('flac') // Ou 'wav' se preferir
+            .toFormat('flac') // Ou 'wav'
+            .on('end', () => {
+                console.log('Conversão de áudio concluída');
+                resolve(outputPath);
+            })
+            .on('error', (err) => {
+                console.error('Erro na conversão de áudio:', err);
+                reject(err);
+            })
+            .saveToFile(outputPath); // Use saveToFile para evitar sobrescrever arquivos
     });
-  }
+}
 
 // Função para transcrever o áudio
 async function transcribeAudio(audioUrl) {
