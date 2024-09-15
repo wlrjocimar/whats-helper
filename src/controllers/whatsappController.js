@@ -74,24 +74,24 @@ async function convertAudio(inputPath, outputPath) {
 }
 
 // Função para transcrever áudio usando AssemblyAI
-async function transcribeAudioWithAssemblyAI(filePath) {
-    const file = fs.readFileSync(filePath);
-    const audioBytes = file.toString('base64');
-
+// Função para transcrever áudio usando AssemblyAI
+async function transcribeAudioWithAssemblyAI(filePath, languageCode = 'pt-BR') {
     try {
-        // Primeiro, faça o upload do áudio para AssemblyAI
+        // Lê o áudio e faz o upload para AssemblyAI
+        const file = fs.readFileSync(filePath);
         const uploadResponse = await axios.post('https://api.assemblyai.com/v2/upload', file, {
             headers: {
                 'authorization': process.env.ASSEMBLYAI_API_KEY,
-                'content-type': 'audio/flac', // Ou o tipo de arquivo correto
+                'content-type': 'audio/wav', // Ajuste o tipo de arquivo conforme necessário
             },
-         });
+        });
 
         const audioUrl = uploadResponse.data.upload_url;
 
-        // Inicie a transcrição
+        // Inicia a transcrição
         const transcriptionResponse = await axios.post('https://api.assemblyai.com/v2/transcript', {
-            audio_url: audioUrl
+            audio_url: audioUrl,
+            language_code: languageCode, // Código do idioma
         }, {
             headers: {
                 'authorization': process.env.ASSEMBLYAI_API_KEY,
@@ -100,7 +100,7 @@ async function transcribeAudioWithAssemblyAI(filePath) {
 
         const transcriptionId = transcriptionResponse.data.id;
 
-        // Aguarde a transcrição ser concluída
+        // Aguarda a transcrição ser concluída
         let result;
         do {
             await new Promise(resolve => setTimeout(resolve, 5000)); // Atraso de 5 segundos
