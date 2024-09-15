@@ -350,7 +350,7 @@ Por favor, escolha uma das opções abaixo:
                 `;
             } else {
                 // Processa a resposta do usuário
-                const optionMatch = Body.toLowerCase().match(/opção\s*(\d+)/);
+                console.log("Resposta do usuario",Body)
                 const lowerCaseBody = Body.toLowerCase();
 
                 // Mapeamento de palavras-chave para opções
