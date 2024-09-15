@@ -2,10 +2,35 @@ const messageService = require('../services/messageService');
 const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
+const speech = require('@google-cloud/speech');
+const client = new speech.SpeechClient();
 
 // Estrutura de dados em memória para gerenciar o estado dos usuários
 const userInteractions = {};
 const INACTIVITY_TIMEOUT = 60 * 60000; // 1h  em milissegundos
+
+
+// Função para transcrever o áudio
+async function transcribeAudio(audioUrl) {
+    const audio = {
+        uri: audioUrl, // URL do áudio enviado pelo WhatsApp
+    };
+    const config = {
+        encoding: 'OGG_OPUS', // Formato do áudio que o WhatsApp utiliza para mensagens de voz
+        sampleRateHertz: 16000,
+        languageCode: 'pt-BR', // Definindo para português do Brasil
+    };
+    const request = {
+        audio: audio,
+        config: config,
+    };
+
+    const [response] = await client.recognize(request);
+    const transcription = response.results
+        .map(result => result.alternatives[0].transcript)
+        .join('\n');
+    return transcription;
+}
 
 // Função para gerar QR Code com opções de configuração
 async function generateQRCode(text) {
@@ -70,129 +95,76 @@ Por favor, escolha uma das opções abaixo:
 
 exports.receiveMessage = async (req, res) => {
     console.log("Dados do request*******", req.body);
-    const { Body, From, ProfileName } = req.body;
-    const userName=ProfileName;
+    const { Body, From, ProfileName, Messages } = req.body;
+    const userName = ProfileName;
 
     console.log("Usuario *********", userName);
 
-    // Verifica se o usuário já tem um estado registrado
     if (!userInteractions[From]) {
         userInteractions[From] = { 
             hasInteracted: false, 
             isTransferredToHuman: 0,
-            lastInteraction: Date.now() // Adiciona timestamp da última interação
+            lastInteraction: Date.now()
         };
     } else {
-        // Atualiza timestamp da última interação
         userInteractions[From].lastInteraction = Date.now();
     }
 
     const userInteraction = userInteractions[From];
     let responseMessage = '';
 
-    // Verifica se o usuário foi inativo por mais de 1hora 
-    if (Date.now() - userInteraction.lastInteraction > INACTIVITY_TIMEOUT) {
-        resetUserInteraction(From);
-        responseMessage = `
+    // Verifica se a mensagem recebida é um áudio
+    if (Messages[0] && Messages[0].type === 'audio') {
+        const audioUrl = Messages[0].audio.url;
 
- Olá    ${ProfileName}  
-   
-🌟 **Menu Principal** 🌟
+        try {
+            // Transcrever o áudio para texto
+            const transcription = await transcribeAudio(audioUrl);
+            console.log('Transcrição do áudio:', transcription);
 
-Por favor, escolha uma das opções abaixo:
+            // Use a transcrição como o `Body` para processar a resposta
+            responseMessage = `Você disse: ${transcription}`;
 
-1️⃣ **Opção 1**: Descrição breve da Opção 1.
-2️⃣ **Opção 2**: Descrição breve da Opção 2.
-3️⃣ **Opção 3**: Descrição breve da Opção 3.
-
-🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
-
-❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
-        `;
+        } catch (error) {
+            console.error('Erro ao transcrever o áudio:', error);
+            responseMessage = 'Desculpe, não consegui entender o áudio. Por favor, tente novamente.';
+        }
     } else {
-        // Se o usuário foi transferido para atendimento humano
-        if (userInteraction.isTransferredToHuman === 2) {
-            // Se o usuário já foi transferido e notificado, não enviar mais mensagens automáticas
+        // Processar mensagem de texto ou outras interações
+        if (Date.now() - userInteraction.lastInteraction > INACTIVITY_TIMEOUT) {
+            resetUserInteraction(From);
+            responseMessage = `Olá ${ProfileName}, escolha uma opção...`;
+        } else if (userInteraction.isTransferredToHuman === 2) {
             responseMessage = null;
         } else if (userInteraction.isTransferredToHuman === 1) {
-            // Se o usuário foi recentemente transferido e precisa ser notificado
-            responseMessage = `
-Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
-
-🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
-
-❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
-            `;
-            // Marca como transferido e notificado
+            responseMessage = `Seu atendimento foi transferido...`;
             userInteraction.isTransferredToHuman = 2;
+        } else if (!userInteraction.hasInteracted) {
+            userInteraction.hasInteracted = true;
+            responseMessage = `Olá ${ProfileName}, escolha uma opção...`;
         } else {
-            // Se o usuário ainda não interagiu ou se está interagindo pela primeira vez
-            if (!userInteraction.hasInteracted) {
-                userInteraction.hasInteracted = true;
-                responseMessage = `
-Olá    ${ProfileName}
-🌟 **Menu Principal** 🌟
-
-Por favor, escolha uma das opções abaixo:
-
-1️⃣ **Opção 1**: Descrição breve da Opção 1.
-2️⃣ **Opção 2**: Descrição breve da Opção 2.
-3️⃣ **Opção 3**: Descrição breve da Opção 3.
-
-🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
-
-❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
-                `;
-            } else {
-                // Processa a resposta do usuário
-                switch (Body) {
-                    case '1':
-                        responseMessage = 'Você escolheu a Opção 1!';
-                        break;
-                    case '2':
-                        responseMessage = 'Você escolheu a Opção 2!';
-                        break;
-                    case '3':
-                        responseMessage = 'Você escolheu a Opção 3!';
-                        break;
-                    case 'menu':
-                        responseMessage = `
-🌟 **Menu Principal** 🌟
-
-Por favor, escolha uma das opções abaixo:
-
-1️⃣ **Opção 1**: Descrição breve da Opção 1.
-2️⃣ **Opção 2**: Descrição breve da Opção 2.
-3️⃣ **Opção 3**: Descrição breve da Opção 3.
-
-🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
-
-❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
-                        `;
-                        break;
-                    case 'ajuda':
-                        responseMessage = 'Para ajuda, entre em contato com o suporte.';
-                        break;
-                    case 'transferir':
-                        // Marca o usuário como transferido para atendimento humano
-                        userInteraction.isTransferredToHuman = 1;
-                        responseMessage = `
-Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um atendente está disponível.
-
-🔄 Se você precisar voltar ao menu principal a qualquer momento, digite *menu*.
-
-❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
-                        `;
-                        break;
-                    default:
-                        responseMessage = `
-❌ Opção inválida. Por favor, escolha 1, 2 ou 3.
-
-🔄 Para retornar ao menu principal, digite *menu*.
-
-❓ Se tiver dúvidas ou precisar de ajuda, digite *ajuda*.
-                        `;
-                }
+            switch (Body) {
+                case '1':
+                    responseMessage = 'Você escolheu a Opção 1!';
+                    break;
+                case '2':
+                    responseMessage = 'Você escolheu a Opção 2!';
+                    break;
+                case '3':
+                    responseMessage = 'Você escolheu a Opção 3!';
+                    break;
+                case 'menu':
+                    responseMessage = 'Menu principal: escolha uma opção...';
+                    break;
+                case 'ajuda':
+                    responseMessage = 'Para ajuda, entre em contato com o suporte.';
+                    break;
+                case 'transferir':
+                    userInteraction.isTransferredToHuman = 1;
+                    responseMessage = `Seu atendimento foi transferido para um humano...`;
+                    break;
+                default:
+                    responseMessage = 'Opção inválida. Digite "menu" para retornar.';
             }
         }
     }
@@ -206,79 +178,6 @@ Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um a
         res.status(500).send(error.message);
     }
 };
-
-exports.sendManualMessage = async (req, res) => {
-    console.log("Mensagem manual", req.body);
-
-    const { message, To } = req.body;
-    if (!userInteractions[To]) {
-        userInteractions[To] = { hasInteracted: true, isTransferredToHuman: 2 };
-    } else {
-        userInteractions[To].isTransferredToHuman = 2;
-    }
-    
-    let responseMessage = message;
-
-    try {
-        await messageService.processMessage(responseMessage, To);
-        res.status(200).send('Resposta processada com sucesso!');
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-};
-
-// Função para enviar um botão
-exports.sendButton = async (req, res) => {
-    const { To } = req.body;
-
-    // Gerar o QR code com a URL desejada
-    const qrCodeText = 'https://bb.com.br';
-
-    try {
-        // Gera o QR code em formato ASCII e imprime no console
-        const qrCodeASCII = await generateQRCode(qrCodeText);
-        console.log('QR Code gerado:\n');
-        console.log(qrCodeASCII);
-
-        // Aqui, você pode criar e hospedar o QR Code em um servidor, se necessário
-        // const qrCodeUrl = 'https://your-server.com/path-to-qrcode.png'; // Atualize com a URL correta
-
-        // Exemplo de mensagem de botão
-        const qrCodeMessage = {
-            "recipient_type": "individual",
-            "to": To,
-            "type": "interactive",
-            "interactive": {
-                "type": "button",
-                "body": {
-                    "text": "Escaneie o QR Code abaixo:"
-                },
-                "action": {
-                    "buttons": [
-                        {
-                            "type": "reply",
-                            "reply": {
-                                "id": "qr_code",
-                                "title": "QR Code"
-                            }
-                        }
-                    ],
-                    // "media": { // Descomente se você estiver enviando uma URL de imagem
-                    //     "type": "image",
-                    //     "url": qrCodeUrl
-                    // }
-                }
-            }
-        };
-
-        // Enviar a mensagem com o QR Code
-        await messageService.sendInteractiveMessage(qrCodeMessage, To);
-        res.status(200).send('QR Code enviado com sucesso!');
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-};
-
 // Configura um intervalo para verificar inatividade dos usuários
 setInterval(() => {
     const now = Date.now();
