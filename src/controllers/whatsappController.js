@@ -7,6 +7,7 @@ require('dotenv').config();
 const { GoogleAuth } = require('google-auth-library');
 const ffmpeg = require('fluent-ffmpeg');
 const axios = require('axios');
+const Twilio = require('twilio');
 
 const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
 
@@ -23,6 +24,30 @@ const client = new speech.SpeechClient({
 // Estrutura de dados em memória para gerenciar o estado dos usuários
 const userInteractions = {};
 const INACTIVITY_TIMEOUT = 60 * 60000; // 1h  em milissegundos
+
+
+//download do audio que foi para a twilio
+async function downloadMedia(mediaUrl, outputPath) {
+    try {
+      const response = await axios({
+        url: mediaUrl,
+        method: 'GET',
+        responseType: 'stream',
+        auth: {
+          username: process.env.TWILIO_ACCOUNT_SID,
+          password: process.env.TWILIO_AUTH_TOKEN
+        }
+      });
+  
+      response.data.pipe(fs.createWriteStream(outputPath));
+      return new Promise((resolve, reject) => {
+        response.data.on('end', () => resolve(outputPath));
+        response.data.on('error', (err) => reject(err));
+      });
+    } catch (error) {
+      throw new Error('Erro ao baixar o arquivo de mídia: ' + error.message);
+    }
+  }
 
 //converter o audio para formato aceito pelo google
 async function convertAudio(inputUrl, outputPath) {
@@ -163,12 +188,15 @@ exports.receiveMessage = async (req, res) => {
         
 
         try {
-            // Transcrever o áudio para texto
-            const transcription = await transcribeAudio(MediaUrl0);
-            console.log('Transcrição do áudio:', transcription);
-
-            // Use a transcrição como o `Body` para processar a resposta
-            responseMessage = `Você disse: ${transcription}`;
+            // Baixar o arquivo de mídia
+            const downloadedFilePath = await downloadMedia(MediaUrl0, 'downloaded_audio.mp3');
+      
+          // Converter o áudio
+          const convertedFilePath = await convertAudio(downloadedFilePath, 'converted_audio.flac');
+      
+            // Transcrever o áudio
+            const transcription = await transcribeAudio(convertedFilePath);
+      console.log('Transcrição do áudio:', transcription);
 
         } catch (error) {
             console.error('Erro ao transcrever o áudio:', error);
