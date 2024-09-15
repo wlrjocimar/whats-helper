@@ -90,12 +90,20 @@ async function quickstart() {
       config: config,
     };
   
-    // Detects speech in the audio file
+    try {
+        // Detects speech in the audio file
     const [response] = await client.recognize(request);
     const transcription = response.results
       .map(result => result.alternatives[0].transcript)
       .join('\n');
     console.log(`Transcription: ${transcription}`);
+        
+    } catch (error) {
+
+        console.log("Erro ao transcrever",error)
+        
+    }
+    
   }
   
 
