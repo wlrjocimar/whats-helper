@@ -41,8 +41,24 @@ const processMessage = async (messageBody, toNumber) => {
         throw new Error(`Erro ao enviar a mensagem: ${error.message}`);
     }
 };
+const sendInteractiveMessage = async (messageBody, toNumber) => {
+    
+    try {
+        const message = await client.messages.create({
+            body: JSON.stringify(messageBody), // Conteúdo da mensagem
+            from: process.env.TWILIO_WHATSAPP_NUMBER, // Número do Twilio
+            to: toNumber // Número do destinatário
+        });
+        return `Mensagem enviada com sucesso! SID: ${message.sid}`; // Retorne a resposta
+    } catch (error) {
+        console.error(`Erro ao enviar a mensagem: ${error.message}`);
+        throw new Error(`Erro ao enviar a mensagem: ${error.message}`);
+    }
+};
+
 
 module.exports = {
     sendMenu,
     processMessage,
+    sendInteractiveMessage,
 };
