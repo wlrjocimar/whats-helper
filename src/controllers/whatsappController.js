@@ -76,6 +76,8 @@ async function transcribeAudio(filePath) {
     const file = fs.readFileSync(filePath);
     const audioBytes = file.toString('base64');
 
+    console.log('Audio bytes length:', audioBytes.length); // Log adicional
+
     const request = {
         audio: {
             content: audioBytes,
@@ -99,7 +101,6 @@ async function transcribeAudio(filePath) {
         throw error;
     }
 }
-
 
 
 // Função para gerar QR Code com opções de configuração
