@@ -90,12 +90,12 @@ exports.receiveMessage = async (req, res) => {
     const userInteraction = userInteractions[From];
     let responseMessage = '';
 
-    // Verifica se o usuário foi inativo por mais de 1 minuto
+    // Verifica se o usuário foi inativo por mais de 1hora 
     if (Date.now() - userInteraction.lastInteraction > INACTIVITY_TIMEOUT) {
         resetUserInteraction(From);
         responseMessage = `
 
- Olá    ${userName}  
+ Olá    ${ProfileName}  
    
 🌟 **Menu Principal** 🌟
 
@@ -130,6 +130,7 @@ Seu atendimento foi transferido para um humano. Por favor, aguarde enquanto um a
             if (!userInteraction.hasInteracted) {
                 userInteraction.hasInteracted = true;
                 responseMessage = `
+Olá    ${ProfileName}
 🌟 **Menu Principal** 🌟
 
 Por favor, escolha uma das opções abaixo:
