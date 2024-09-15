@@ -356,8 +356,8 @@ Por favor, escolha uma das opções abaixo:
                 // Mapeamento de palavras-chave para opções
                 const optionKeywords = {
                     '1': ['1', 'escolho 1', 'eu quero 1', 'opção 1', 'opção um'],
-                    '2': ['2', 'escolho 2', 'eu quero 2', 'opção 2', 'opção dois'],
-                    '3': ['3', 'escolho 3', 'eu quero 3', 'opção 3', 'opção três'],
+                    '2': ['2', 'escolho 2', 'eu quero 2', 'opção 2', 'opção dois','dois'],
+                    '3': ['3', 'escolho 3', 'eu quero 3', 'opção 3', 'opção três','tres','três'],
                     'ajuda': ['ajuda', 'preciso de ajuda', 'me ajude', 'suporte'],
                     'transferir': ['transferir', 'falar com um humano', 'suporte humano']
                 };
