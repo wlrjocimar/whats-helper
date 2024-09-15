@@ -198,7 +198,7 @@ exports.receiveMessage = async (req, res) => {
           const convertedFilePath = await convertAudio(downloadedFilePath, 'converted_audio.flac');
       
             // Transcrever o áudio
-            const transcription = await transcribeAudio(convertedFilePath);
+            const transcription = await transcribeAudio("output.flac");
       console.log('Transcrição do áudio:', transcription);
 
         } catch (error) {
