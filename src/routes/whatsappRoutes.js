@@ -13,6 +13,9 @@ router.post('/send-menu', whatsappController.sendMenu);
 // Rota para receber e processar mensagens api oficial
 router.get('/webhook', whatsappController.receiveMessageOfficialApi);
 
+// Rota para receber e processar mensagens api oficial
+router.post('/webhook', whatsappController.receiveMessageOfficialApiPost);
+
 // Nova rota para enviar um botão
 router.post('/send-button', whatsappController.sendButton);
 
