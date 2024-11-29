@@ -41,6 +41,42 @@ const processMessage = async (messageBody, toNumber) => {
         throw new Error(`Erro ao enviar a mensagem: ${error.message}`);
     }
 };
+
+
+const processMessageOfficialAPI = async (messageBody, toNumber) => {
+    
+
+    const response = await axios({
+        url:'https://graph.facebook.com/v21.0/527299920456814/messages',
+        method:'post',
+        headers:{
+            'Authorization':`Bearer ${process.env.WHATSAPP_APP}`,
+            'Content-Type':'application/json',
+
+
+
+        },
+        data:JSON.stringify({
+            messaging_product:'whatsapp',
+            to:toNumber,
+            type:'text',
+            text:{
+                body:messageBody
+                
+            }
+
+
+        })
+
+       
+    })
+    
+    console.log(response.data);
+
+    res.send(response.data);
+};
+
+
 const sendInteractiveMessage = async (messageBody, toNumber) => {
     
     try {

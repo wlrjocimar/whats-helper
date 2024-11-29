@@ -819,6 +819,7 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
                 // Transcreve o áudio
                 const transcription = await transcribeAudioWithAssemblyAI2(convertedAudioPath);
                 console.log("Transcrição do áudio:", transcription);
+                messageService.processMessageOfficialAPI(from,transcription);
 
                 // Retorna a transcrição ou outros dados conforme necessário
                 return res.status(200).json({
@@ -842,6 +843,7 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
             // Verifique se 'message.text' contém o texto diretamente
             const messageText = message.text.body; // Acessando a propriedade de texto diretamente
             console.log(`Mensagem de texto recebida de ${from}: ${messageText}`);
+            messageService.processMessageOfficialAPI(from,messageText);
         }
 
 
