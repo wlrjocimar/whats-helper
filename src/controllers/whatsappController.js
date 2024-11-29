@@ -296,7 +296,7 @@ Por favor, escolha uma das opções abaixo:
 
 exports.receiveMessageOfficialApi = async (req, res) => {
     // Logs para inspecionar os dados da requisição
-    console.log("Dados da requisição:", req.body);
+    console.log("Dados da requisição:", req);
     console.log("Headers da requisição:", req.headers);
 
     // Exemplo de verificação de requisição (geralmente para requisição GET de verificação)
