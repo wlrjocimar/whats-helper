@@ -73,7 +73,7 @@ const processMessageOfficialAPI = async (messageBody, toNumber) => {
        
     })
     
-    console.log(response.data);
+   // console.log(response.data);
 
    
 };

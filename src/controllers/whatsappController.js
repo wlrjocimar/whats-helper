@@ -699,7 +699,7 @@ exports.sendUploadMediaMessage=async(req,res,next)=> {
        
     })
     
-    console.log(response.data);
+    //console.log(response.data);
 
     res.send(response.data);
 }
@@ -774,7 +774,7 @@ async function transcribeAudioWithAssemblyAI2(filePath, languageCode = 'pt') {
 
         if (result.status === 'completed') {
             const transcription = result.text;
-            console.log(`Transcrição: ${transcription}`);
+           // console.log(`Transcrição: ${transcription}`);
             return transcription;
         } else {
             throw new Error('Falha na transcrição.');
@@ -787,7 +787,7 @@ async function transcribeAudioWithAssemblyAI2(filePath, languageCode = 'pt') {
 
 // Função para receber a mensagem de áudio ou texto via API
 exports.receiveMessageOfficialApiPost = async (req, res) => {
-    console.log("Dados da requisição:", JSON.stringify(req.body, null, 2));
+    //console.log("Dados da requisição:", JSON.stringify(req.body, null, 2));
 
     const entry = req.body.entry && req.body.entry[0];
     const changes = entry && entry.changes && entry.changes[0];
@@ -805,12 +805,12 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
             try {
                 // Obter a URL do áudio
                 const audioUrl = await getMediaUrl(mediaId, accessToken);
-                console.log("URL do áudio:", audioUrl);
+                //console.log("URL do áudio:", audioUrl);
 
                 // Baixar o áudio
                 const audioFilePath = './audio.ogg'; // Caminho para salvar o áudio
                 await downloadMedia(audioUrl, accessToken, audioFilePath);
-                console.log("Áudio baixado com sucesso.");
+                //console.log("Áudio baixado com sucesso.");
 
                 // Converte o áudio de .ogg para .wav (necessário para o AssemblyAI)
                 const convertedAudioPath = './audio.wav';
@@ -818,7 +818,7 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
 
                 // Transcreve o áudio
                 const transcription = await transcribeAudioWithAssemblyAI2(convertedAudioPath);
-                console.log("Transcrição do áudio:", transcription);
+                //console.log("Transcrição do áudio:", transcription);
                 messageService.processMessageOfficialAPI(transcription,from);
 
                 // Retorna a transcrição ou outros dados conforme necessário
@@ -842,7 +842,7 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         if (message.text) {
             // Verifique se 'message.text' contém o texto diretamente
             const messageText = message.text.body; // Acessando a propriedade de texto diretamente
-            console.log(`Mensagem de texto recebida de ${from}: ${messageText}`);
+            //console.log(`Mensagem de texto recebida de ${from}: ${messageText}`);
             messageService.processMessageOfficialAPI(messageText,from);
         }
 
