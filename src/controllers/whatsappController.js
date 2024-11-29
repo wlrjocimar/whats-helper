@@ -704,8 +704,36 @@ exports.sendUploadMediaMessage=async(req,res,next)=> {
     res.send(response.data);
 }
 
+async function getMediaUrl(mediaId, accessToken) {
+    const url = `https://graph.facebook.com/v21.0/${mediaId}/`;
+    const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    if (response.data.url) {
+        return response.data.url; // Retorna a URL do áudio
+    } else {
+        throw new Error('URL do áudio não encontrada');
+    }
+}
+
+async function downloadMedia(mediaUrl, accessToken, downloadPath) {
+    const response = await axios.get(mediaUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        responseType: 'stream'
+    });
+
+    const writer = fs.createWriteStream(downloadPath);
+    response.data.pipe(writer);
+
+    return new Promise((resolve, reject) => {
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+    });
+}
+
 exports.receiveMessageOfficialApiPost = async (req, res) => {
-    console.log("Dados da requisição:", JSON.stringify(req.body, null, 2)); // Imprime a estrutura completa
+    console.log("Dados da requisição:", JSON.stringify(req.body, null, 2));
 
     const entry = req.body.entry && req.body.entry[0];
     const changes = entry && entry.changes && entry.changes[0];
@@ -715,49 +743,27 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         const message = messages[0];
         const from = message.from;
 
-        let messageType = 'Desconhecido';
-        let messageText = null;
-        let audioUrl = null;  // URL do áudio
+        if (message.audio) {
+            const mediaId = message.audio.id;
+            const accessToken = process.env.WHATSAPP_APP; // Coloque o seu token de acesso
 
-        if (message.text && message.text.body) {
-            messageType = 'Texto';
-            messageText = message.text.body;
-        } else if (message.audio) {
-            messageType = 'Áudio';
-            console.log("Estrutura do áudio:", message.audio); // Adicionando para verificar a estrutura do áudio
-            audioUrl = message.audio.url || message.audio.MediaUrl0;  // Tenta pegar MediaUrl0 caso a estrutura seja diferente
-        }
-
-        console.log(`Mensagem recebida de ${from}`);
-        console.log(`Tipo da mensagem: ${messageType}`);
-        console.log("Url do áudio", audioUrl);
-
-        if (messageType === 'Áudio' && audioUrl) {
             try {
-                console.log("Início da conversão do áudio...");
-                
-                const audioFilePath = './audio.ogg';  // Caminho do arquivo de áudio baixado
-                const convertedFilePath = './converted_audio.wav'; // Caminho do áudio convertido
+                // Obter a URL do áudio
+                const audioUrl = await getMediaUrl(mediaId, accessToken);
+                console.log("URL do áudio:", audioUrl);
 
                 // Baixar o áudio
-                await downloadMedia(audioUrl, audioFilePath);
+                const audioFilePath = './audio.ogg'; // Caminho para salvar o áudio
+                await downloadMedia(audioUrl, accessToken, audioFilePath);
                 console.log("Áudio baixado com sucesso.");
 
-                // Converter o áudio para formato WAV ou FLAC
-                await convertAudio(audioFilePath, convertedFilePath);
-                console.log("Áudio convertido com sucesso.");
+                // Aqui você pode processar o áudio, por exemplo, convertê-lo ou transcrevê-lo
 
-                // Transcrever o áudio
-                const transcription = await transcribeAudio(convertedFilePath);
-                console.log("Transcrição concluída:", transcription);
-
-                // Retornar a transcrição como resposta
                 return res.status(200).json({
                     status: '200',
                     message: 'Mensagem de áudio processada com sucesso',
                     from: from,
-                    messageType: messageType,
-                    transcription: transcription
+                    audioUrl: audioUrl
                 });
 
             } catch (error) {
@@ -772,12 +778,9 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         return res.status(200).json({
             status: '200',
             message: 'Mensagem recebida com sucesso',
-            from: from,
-            messageType: messageType,
-            messageText: messageText
+            from: from
         });
     } else {
         return res.status(400).json({ status: '400', message: 'Nenhuma mensagem encontrada' });
     }
 };
-
