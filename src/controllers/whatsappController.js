@@ -729,12 +729,12 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
 
         console.log(`Mensagem recebida de ${from}`);
         console.log(`Tipo da mensagem: ${messageType}`);
-        console.log("Url do audio", audioUrl)
+        console.log("Url do áudio", audioUrl);
 
         if (messageType === 'Áudio' && audioUrl) {
-            // Chama a função para baixar e transcrever o áudio
             try {
-                console.log("inicio conversao de audio")
+                console.log("Início da conversão do áudio...");
+                
                 const audioFilePath = './audio.ogg';  // Caminho do arquivo de áudio baixado
                 const convertedFilePath = './converted_audio.wav'; // Caminho do áudio convertido
 
