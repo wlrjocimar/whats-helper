@@ -732,6 +732,60 @@ async function downloadMedia(mediaUrl, accessToken, downloadPath) {
     });
 }
 
+// Função para transcrever áudio com AssemblyAI
+async function transcribeAudioWithAssemblyAI2(filePath, languageCode = 'pt') {
+    try {
+        // Lê o arquivo de áudio
+        const file = fs.readFileSync(filePath);
+
+        // Faz o upload para o AssemblyAI
+        const uploadResponse = await axios.post('https://api.assemblyai.com/v2/upload', file, {
+            headers: {
+                'authorization': process.env.ASSEMBLYAI_API_KEY,
+                'content-type': 'audio/wav', // Ajuste o tipo de arquivo conforme necessário
+            },
+        });
+
+        const audioUrl = uploadResponse.data.upload_url;
+
+        // Inicia a transcrição
+        const transcriptionResponse = await axios.post('https://api.assemblyai.com/v2/transcript', {
+            audio_url: audioUrl,
+            language_code: languageCode, // Código do idioma
+        }, {
+            headers: {
+                'authorization': process.env.ASSEMBLYAI_API_KEY,
+            },
+        });
+
+        const transcriptionId = transcriptionResponse.data.id;
+
+        // Aguarda a transcrição ser concluída
+        let result;
+        do {
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Atraso de 5 segundos
+            const statusResponse = await axios.get(`https://api.assemblyai.com/v2/transcript/${transcriptionId}`, {
+                headers: {
+                    'authorization': process.env.ASSEMBLYAI_API_KEY,
+                },
+            });
+            result = statusResponse.data;
+        } while (result.status !== 'completed' && result.status !== 'failed');
+
+        if (result.status === 'completed') {
+            const transcription = result.text;
+            console.log(`Transcrição: ${transcription}`);
+            return transcription;
+        } else {
+            throw new Error('Falha na transcrição.');
+        }
+    } catch (error) {
+        console.error('Erro ao transcrever o áudio com AssemblyAI:', error);
+        throw error;
+    }
+}
+
+// Função para receber a mensagem de áudio ou texto via API
 exports.receiveMessageOfficialApiPost = async (req, res) => {
     console.log("Dados da requisição:", JSON.stringify(req.body, null, 2));
 
@@ -743,6 +797,7 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         const message = messages[0];
         const from = message.from;
 
+        // Verifica se é uma mensagem de áudio
         if (message.audio) {
             const mediaId = message.audio.id;
             const accessToken = process.env.WHATSAPP_APP; // Coloque o seu token de acesso
@@ -757,13 +812,20 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
                 await downloadMedia(audioUrl, accessToken, audioFilePath);
                 console.log("Áudio baixado com sucesso.");
 
-                // Aqui você pode processar o áudio, por exemplo, convertê-lo ou transcrevê-lo
+                // Converte o áudio de .ogg para .wav (necessário para o AssemblyAI)
+                const convertedAudioPath = './audio.wav';
+                await convertOggToWav(audioFilePath, convertedAudioPath); // Implemente a função de conversão se necessário
 
+                // Transcreve o áudio
+                const transcription = await transcribeAudioWithAssemblyAI2(convertedAudioPath);
+                console.log("Transcrição do áudio:", transcription);
+
+                // Retorna a transcrição ou outros dados conforme necessário
                 return res.status(200).json({
                     status: '200',
                     message: 'Mensagem de áudio processada com sucesso',
                     from: from,
-                    audioUrl: audioUrl
+                    transcription: transcription
                 });
 
             } catch (error) {
@@ -775,6 +837,12 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
             }
         }
 
+        // Verifica se é uma mensagem de texto
+        if (message.text) {
+            console.log(`Mensagem de texto recebida de ${from}: ${message.text}`);
+        }
+
+        // Responde de volta, se necessário
         return res.status(200).json({
             status: '200',
             message: 'Mensagem recebida com sucesso',
@@ -784,3 +852,16 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         return res.status(400).json({ status: '400', message: 'Nenhuma mensagem encontrada' });
     }
 };
+
+// Função para converter áudio .ogg para .wav (precisa ser implementada)
+async function convertOggToWav(inputPath, outputPath) {
+    // Exemplo de conversão, usando uma biblioteca como ffmpeg
+    const ffmpeg = require('fluent-ffmpeg');
+    return new Promise((resolve, reject) => {
+        ffmpeg(inputPath)
+            .toFormat('wav')
+            .on('end', () => resolve())
+            .on('error', (err) => reject(err))
+            .save(outputPath);
+    });
+}
