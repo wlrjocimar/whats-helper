@@ -839,8 +839,11 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
 
         // Verifica se é uma mensagem de texto
         if (message.text) {
-            console.log(`Mensagem de texto recebida de ${from}: ${message.text}`);
+            // Verifique se 'message.text' contém o texto diretamente
+            const messageText = message.text; // Acessando a propriedade de texto diretamente
+            console.log(`Mensagem de texto recebida de ${from}: ${messageText}`);
         }
+
 
         // Responde de volta, se necessário
         return res.status(200).json({
