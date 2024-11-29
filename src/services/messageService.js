@@ -97,4 +97,5 @@ module.exports = {
     sendMenu,
     processMessage,
     sendInteractiveMessage,
+    processMessageOfficialAPI
 };
