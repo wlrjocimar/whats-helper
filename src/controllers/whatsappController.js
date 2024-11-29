@@ -333,8 +333,31 @@ exports.receiveMessageOfficialApi = async (req, res) => {
 exports.receiveMessageOfficialApiPost = async (req, res) => {
     // Logs para inspecionar os dados da requisição
     console.log("Dados da requisição:", req.body);
-    return res.status(200).json({ status: '200', message: 'Mensagem recebida com sucesso' });
-   
+
+    // Acessando a estrutura de dados da mensagem
+    const entry = req.body.entry && req.body.entry[0];
+    const changes = entry && entry.changes && entry.changes[0];
+    const messages = changes && changes.value && changes.value.messages;
+
+    if (messages && messages.length > 0) {
+        const message = messages[0]; // Assumindo que estamos lidando com a primeira mensagem
+        const from = message.from;  // Número de telefone do remetente
+        const messageText = message.text ? message.text.body : null;  // Corpo da mensagem, se for texto
+
+        // Log dos dados da mensagem recebida
+        console.log(`Mensagem recebida de ${from}: ${messageText}`);
+
+        // Aqui você pode adicionar lógica para responder à mensagem ou processá-la como necessário
+        return res.status(200).json({
+            status: '200',
+            message: 'Mensagem recebida com sucesso',
+            from: from,
+            messageText: messageText
+        });
+    } else {
+        // Caso não haja mensagens no payload
+        return res.status(400).json({ status: '400', message: 'Nenhuma mensagem encontrada' });
+    }
 };
 
 
