@@ -840,7 +840,7 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         // Verifica se é uma mensagem de texto
         if (message.text) {
             // Verifique se 'message.text' contém o texto diretamente
-            const messageText = message.text; // Acessando a propriedade de texto diretamente
+            const messageText = message.text.body; // Acessando a propriedade de texto diretamente
             console.log(`Mensagem de texto recebida de ${from}: ${messageText}`);
         }
 
