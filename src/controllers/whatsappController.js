@@ -729,6 +729,7 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
 
         console.log(`Mensagem recebida de ${from}`);
         console.log(`Tipo da mensagem: ${messageType}`);
+        console.log("Url do audio", audioUrl)
 
         if (messageType === 'Áudio' && audioUrl) {
             // Chama a função para baixar e transcrever o áudio
