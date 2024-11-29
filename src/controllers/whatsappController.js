@@ -705,7 +705,7 @@ exports.sendUploadMediaMessage=async(req,res,next)=> {
 }
 
 exports.receiveMessageOfficialApiPost = async (req, res) => {
-    console.log("Dados da requisição:", req.body);
+    console.log("Dados da requisição:", JSON.stringify(req.body, null, 2)); // Imprime a estrutura completa
 
     const entry = req.body.entry && req.body.entry[0];
     const changes = entry && entry.changes && entry.changes[0];
@@ -724,7 +724,8 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
             messageText = message.text.body;
         } else if (message.audio) {
             messageType = 'Áudio';
-            audioUrl = message.audio.url;  // Obtendo a URL do áudio
+            console.log("Estrutura do áudio:", message.audio); // Adicionando para verificar a estrutura do áudio
+            audioUrl = message.audio.url || message.audio.MediaUrl0;  // Tenta pegar MediaUrl0 caso a estrutura seja diferente
         }
 
         console.log(`Mensagem recebida de ${from}`);
@@ -779,3 +780,4 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         return res.status(400).json({ status: '400', message: 'Nenhuma mensagem encontrada' });
     }
 };
+
