@@ -60,7 +60,7 @@ const processMessageOfficialAPI = async (messageBody, toNumber) => {
         },
         data:JSON.stringify({
             messaging_product:'whatsapp',
-            to:String(toNumber),
+            to:'5541997282239',
             type:'text',
             text:{
                 body:messageBody
