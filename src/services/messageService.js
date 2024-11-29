@@ -1,4 +1,5 @@
 require('dotenv').config(); // Carrega variáveis de ambiente
+const axios =require('axios');
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID; // Do .env
 const authToken = process.env.TWILIO_AUTH_TOKEN;   // Do .env
