@@ -329,7 +329,6 @@ exports.receiveMessageOfficialApi = async (req, res) => {
     return res.status(405).json({ status: '405', message: 'Método não permitido' });
 };
 
-
 exports.receiveMessageOfficialApiPost = async (req, res) => {
     // Logs para inspecionar os dados da requisição
     console.log("Dados da requisição:", req.body);
@@ -342,16 +341,41 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
     if (messages && messages.length > 0) {
         const message = messages[0]; // Assumindo que estamos lidando com a primeira mensagem
         const from = message.from;  // Número de telefone do remetente
-        const messageText = message.text ? message.text.body : null;  // Corpo da mensagem, se for texto
 
-        // Log dos dados da mensagem recebida
-        console.log(`Mensagem recebida de ${from}: ${messageText}`);
+        // Inicializando a variável para o tipo de mensagem
+        let messageType = 'Desconhecido';
+        let messageText = null;
 
-        // Aqui você pode adicionar lógica para responder à mensagem ou processá-la como necessário
+        // Verificando o tipo da mensagem
+        if (message.text && message.text.body) {
+            messageType = 'Texto';
+            messageText = message.text.body;  // Corpo da mensagem de texto
+        } else if (message.audio) {
+            messageType = 'Áudio';
+        } else if (message.image) {
+            messageType = 'Imagem';
+        } else if (message.video) {
+            messageType = 'Vídeo';
+        } else if (message.location) {
+            messageType = 'Localização';
+        } else if (message.contact) {
+            messageType = 'Contato';
+        }
+
+        // Logando as informações
+        console.log(`Mensagem recebida de ${from}`);
+        console.log(`Tipo da mensagem: ${messageType}`);
+
+        if (messageType === 'Texto') {
+            console.log(`Conteúdo da mensagem: ${messageText}`);
+        }
+
+        // Retornando a resposta com as informações
         return res.status(200).json({
             status: '200',
             message: 'Mensagem recebida com sucesso',
             from: from,
+            messageType: messageType,
             messageText: messageText
         });
     } else {
@@ -359,6 +383,7 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         return res.status(400).json({ status: '400', message: 'Nenhuma mensagem encontrada' });
     }
 };
+
 
 
 
