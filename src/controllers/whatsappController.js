@@ -329,60 +329,7 @@ exports.receiveMessageOfficialApi = async (req, res) => {
     return res.status(405).json({ status: '405', message: 'Método não permitido' });
 };
 
-exports.receiveMessageOfficialApiPost = async (req, res) => {
-    // Logs para inspecionar os dados da requisição
-    console.log("Dados da requisição:", req.body);
 
-    // Acessando a estrutura de dados da mensagem
-    const entry = req.body.entry && req.body.entry[0];
-    const changes = entry && entry.changes && entry.changes[0];
-    const messages = changes && changes.value && changes.value.messages;
-
-    if (messages && messages.length > 0) {
-        const message = messages[0]; // Assumindo que estamos lidando com a primeira mensagem
-        const from = message.from;  // Número de telefone do remetente
-
-        // Inicializando a variável para o tipo de mensagem
-        let messageType = 'Desconhecido';
-        let messageText = null;
-
-        // Verificando o tipo da mensagem
-        if (message.text && message.text.body) {
-            messageType = 'Texto';
-            messageText = message.text.body;  // Corpo da mensagem de texto
-        } else if (message.audio) {
-            messageType = 'Áudio';
-        } else if (message.image) {
-            messageType = 'Imagem';
-        } else if (message.video) {
-            messageType = 'Vídeo';
-        } else if (message.location) {
-            messageType = 'Localização';
-        } else if (message.contact) {
-            messageType = 'Contato';
-        }
-
-        // Logando as informações
-        console.log(`Mensagem recebida de ${from}`);
-        console.log(`Tipo da mensagem: ${messageType}`);
-
-        if (messageType === 'Texto') {
-            console.log(`Conteúdo da mensagem: ${messageText}`);
-        }
-
-        // Retornando a resposta com as informações
-        return res.status(200).json({
-            status: '200',
-            message: 'Mensagem recebida com sucesso',
-            from: from,
-            messageType: messageType,
-            messageText: messageText
-        });
-    } else {
-        // Caso não haja mensagens no payload
-        return res.status(400).json({ status: '400', message: 'Nenhuma mensagem encontrada' });
-    }
-};
 
 
 
@@ -756,3 +703,77 @@ exports.sendUploadMediaMessage=async(req,res,next)=> {
 
     res.send(response.data);
 }
+
+exports.receiveMessageOfficialApiPost = async (req, res) => {
+    console.log("Dados da requisição:", req.body);
+
+    const entry = req.body.entry && req.body.entry[0];
+    const changes = entry && entry.changes && entry.changes[0];
+    const messages = changes && changes.value && changes.value.messages;
+
+    if (messages && messages.length > 0) {
+        const message = messages[0];
+        const from = message.from;
+
+        let messageType = 'Desconhecido';
+        let messageText = null;
+        let audioUrl = null;  // URL do áudio
+
+        if (message.text && message.text.body) {
+            messageType = 'Texto';
+            messageText = message.text.body;
+        } else if (message.audio) {
+            messageType = 'Áudio';
+            audioUrl = message.audio.url;  // Obtendo a URL do áudio
+        }
+
+        console.log(`Mensagem recebida de ${from}`);
+        console.log(`Tipo da mensagem: ${messageType}`);
+
+        if (messageType === 'Áudio' && audioUrl) {
+            // Chama a função para baixar e transcrever o áudio
+            try {
+                const audioFilePath = './audio.ogg';  // Caminho do arquivo de áudio baixado
+                const convertedFilePath = './converted_audio.wav'; // Caminho do áudio convertido
+
+                // Baixar o áudio
+                await downloadMedia(audioUrl, audioFilePath);
+                console.log("Áudio baixado com sucesso.");
+
+                // Converter o áudio para formato WAV ou FLAC
+                await convertAudio(audioFilePath, convertedFilePath);
+                console.log("Áudio convertido com sucesso.");
+
+                // Transcrever o áudio
+                const transcription = await transcribeAudio(convertedFilePath);
+                console.log("Transcrição concluída:", transcription);
+
+                // Retornar a transcrição como resposta
+                return res.status(200).json({
+                    status: '200',
+                    message: 'Mensagem de áudio processada com sucesso',
+                    from: from,
+                    messageType: messageType,
+                    transcription: transcription
+                });
+
+            } catch (error) {
+                console.error('Erro ao processar o áudio:', error);
+                return res.status(500).json({
+                    status: '500',
+                    message: 'Erro ao processar o áudio'
+                });
+            }
+        }
+
+        return res.status(200).json({
+            status: '200',
+            message: 'Mensagem recebida com sucesso',
+            from: from,
+            messageType: messageType,
+            messageText: messageText
+        });
+    } else {
+        return res.status(400).json({ status: '400', message: 'Nenhuma mensagem encontrada' });
+    }
+};
