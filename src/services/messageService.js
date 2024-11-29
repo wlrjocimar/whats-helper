@@ -45,7 +45,7 @@ const processMessage = async (messageBody, toNumber) => {
 
 
 const processMessageOfficialAPI = async (messageBody, toNumber) => {
-    console.log("Precessar envio automatico de mensagem para o destinatario",toNumber)
+    console.log("Precessar envio automatico de mensagem para o destinatario",String(toNumber))
     
 
     const response = await axios({
