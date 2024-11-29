@@ -11,7 +11,7 @@ const Twilio = require('twilio');
 const grpc = require('@grpc/grpc-js');
 grpc.setLogVerbosity(grpc.logVerbosity.DEBUG);
 grpc.setLogger(console);
-
+const FormData = require('form-data');
 const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
 
 const auth = new GoogleAuth({
@@ -187,21 +187,66 @@ async function transcribeAudio(filePath) {
     }
 }
 
-// Função para gerar QR Code com opções de configuração
-async function generateQRCode(text) {
-    await quickstart();
-    // try {
-    //     // Gera o QR code em formato ASCII com configurações ajustadas
-    //     const qrCodeASCII = await QRCode.toString(text, {
-    //         type: 'terminal',
-    //         errorCorrectionLevel: 'L', // Nível de correção de erro baixo
-    //         scale: 1 // Ajuste a escala para reduzir o tamanho
-    //     });
-    //     return qrCodeASCII;
-    // } catch (error) {
-    //     throw new Error('Erro ao gerar o QR Code: ' + error.message);
-    // }
+
+exports.sendMessageTemplate=async(req,res,next)=> {
+
+    
+
+    const response = await axios({
+        url:'https://graph.facebook.com/v21.0/527299920456814/messages',
+        method:'post',
+        headers:{
+            'Authorization':`Bearer ${process.env.WHATSAPP_APP}`,
+            'Content-Type':'application/json',
+
+
+
+        },
+        data:JSON.stringify({
+            messaging_product:'whatsapp',
+            to:'5541997282239',
+            type:'template',
+            template:{
+                name:'discount',
+                language:{
+                    code:'en',
+
+                },
+                components:[
+                    {
+                        type:'header',
+                        parameters:[
+                            {
+                                type:'text',
+                                text:'John Doe'
+                            }
+                        ]
+                    },
+                    {
+                        type:'body',
+                        parameters:[
+                            {
+                                type:'text',
+                                text:'50'
+                            }
+                        ]
+                    }
+                ]
+            }
+
+
+        })
+
+       
+    })
+    
+    console.log(response.data);
+
+    res.send(response.data);
 }
+
+
+
 
 // Função para reiniciar o atendimento se o usuário estiver inativo
 function resetUserInteraction(userId) {
@@ -249,8 +294,13 @@ Por favor, escolha uma das opções abaixo:
     }
 };
 
+exports.receiveMessageOfficialApi = async (req, res) => {
+
+    res.status(200).json({"status":"200"})
+}
+
 exports.receiveMessage = async (req, res) => {
-    console.log("Dados do request*******", req.body);
+   console.log("Dados do request*******", req.body);
     let { Body, From, ProfileName, MessageType, MediaUrl0 } = req.body;
     const userName = ProfileName;
 
@@ -258,7 +308,7 @@ exports.receiveMessage = async (req, res) => {
     console.log("Usuario *********", userName);
 
     // Verifica se o usuário já tem um estado registrado
-    if (!userInteractions[From]) {
+    if (!userInteractions[From]) { 
         userInteractions[From] = {
             hasInteracted: false,
             isTransferredToHuman: 0,
@@ -521,3 +571,100 @@ setInterval(() => {
         }
     }
 }, 60000); // Verifica a cada minuto
+
+
+
+exports.sendTextMessage=async(req,res,next)=> {
+
+    
+
+    const response = await axios({
+        url:'https://graph.facebook.com/v21.0/527299920456814/messages',
+        method:'post',
+        headers:{
+            'Authorization':`Bearer ${process.env.WHATSAPP_APP}`,
+            'Content-Type':'application/json',
+
+
+
+        },
+        data:JSON.stringify({
+            messaging_product:'whatsapp',
+            to:'5541997282239',
+            type:'text',
+            text:{
+                body:'This is a text message'
+                
+            }
+
+
+        })
+
+       
+    })
+    
+    console.log(response.data);
+
+    res.send(response.data);
+}
+
+
+exports.sendMediaMessage=async(req,res,next)=> {
+
+    
+
+    const response = await axios({
+        url:'https://graph.facebook.com/v21.0/527299920456814/messages',
+        method:'post',
+        headers:{
+            'Authorization':`Bearer ${process.env.WHATSAPP_APP}`,
+            'Content-Type':'application/json',
+
+
+
+        },
+        data:JSON.stringify({
+            messaging_product:'whatsapp',
+            to:'5541997282239',
+            type:'image',
+            image:{
+                //link:'https://dummyimage.com/600x400/000/fff.png&text=manfra.io',
+                id:'1805459446525760',
+                caption:'This is a media message.'
+                
+            }
+
+
+        })
+
+       
+    })
+    
+    console.log(response.data);
+
+    res.send(response.data);
+}
+
+exports.sendUploadMediaMessage=async(req,res,next)=> {
+
+    const data = new FormData();
+    data.append('messaging_product','whatsapp')
+    data.append('file', fs.createReadStream('C:\\Users\\F5078775\\Downloads\\foto.jpeg'), { contentType: 'image/jpeg' });
+    data.append('type','image/jpeg')
+
+
+    const response = await axios({
+        url:'https://graph.facebook.com/v21.0/527299920456814/media',
+        method:'post',
+        headers:{
+            'Authorization':`Bearer ${process.env.WHATSAPP_APP}`
+            },
+        data:data
+
+       
+    })
+    
+    console.log(response.data);
+
+    res.send(response.data);
+}
