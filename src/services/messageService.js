@@ -46,7 +46,7 @@ const processMessage = async (messageBody, toNumber) => {
 
 const processMessageOfficialAPI = async (messageBody, toNumber) => {
     // Converte toNumber para string, caso não seja uma string
-    const toNumberStr = `'${String(toNumber)}'`; // Colocando entre aspas simples
+    const toNumberStr = `'${toNumber}'`; // Colocando entre aspas simples
 
     console.log("Processando envio automático de mensagem para o destinatário:", toNumberStr);
     
