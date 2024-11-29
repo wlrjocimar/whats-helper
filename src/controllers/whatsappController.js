@@ -296,6 +296,9 @@ Por favor, escolha uma das opções abaixo:
 
 exports.receiveMessageOfficialApi = async (req, res) => {
 
+    console.log("dados da requisicao",req)
+    console.log("Headers da requisicao",req.headers)
+
     res.status(200).json({"status":"200"})
 }
 
