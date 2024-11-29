@@ -45,37 +45,36 @@ const processMessage = async (messageBody, toNumber) => {
 
 
 const processMessageOfficialAPI = async (messageBody, toNumber) => {
-    console.log("Precessar envio automatico de mensagem para o destinatario",String(toNumber))
+    // Converte toNumber para string, caso não seja uma string
+    const toNumberStr = `'${String(toNumber)}'`; // Colocando entre aspas simples
+
+    console.log("Processando envio automático de mensagem para o destinatário:", toNumberStr);
     
+    try {
+        // Envia a mensagem com o número de telefone formatado com aspas simples
+        const response = await axios({
+            url: 'https://graph.facebook.com/v21.0/527299920456814/messages',
+            method: 'post',
+            headers: {
+                'Authorization': `Bearer ${process.env.WHATSAPP_APP}`,
+                'Content-Type': 'application/json',
+            },
+            data: JSON.stringify({
+                messaging_product: 'whatsapp',
+                to: toNumberStr, // Aqui o número com aspas simples será incluído
+                type: 'text',
+                text: {
+                    body: messageBody
+                }
+            })
+        });
 
-    const response = await axios({
-        url:'https://graph.facebook.com/v21.0/527299920456814/messages',
-        method:'post',
-        headers:{
-            'Authorization':`Bearer ${process.env.WHATSAPP_APP}`,
-            'Content-Type':'application/json',
+        // Log do retorno da API (para debugar, se necessário)
+       // console.log("Resposta da API:", response.data);
 
-
-
-        },
-        data:JSON.stringify({
-            messaging_product:'whatsapp',
-            to:'5541997282239',
-            type:'text',
-            text:{
-                body:messageBody
-                
-            }
-
-
-        })
-
-       
-    })
-    
-   // console.log(response.data);
-
-   
+    } catch (error) {
+        console.error("Erro ao enviar a mensagem:", error);
+    }
 };
 
 
