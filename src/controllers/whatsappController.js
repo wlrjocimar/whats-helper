@@ -332,37 +332,9 @@ exports.receiveMessageOfficialApi = async (req, res) => {
 
 exports.receiveMessageOfficialApiPost = async (req, res) => {
     // Logs para inspecionar os dados da requisição
-    console.log("Dados da requisição:", req);
-    console.log("Headers da requisição:", req.headers);
-
-    // Exemplo de verificação de requisição (geralmente para requisição GET de verificação)
-    if (req.method === 'GET') {
-        // A verificação pode vir como um parâmetro na query string
-        const verificationToken = req.query['hub.verify_token'];  // Substitua com o nome correto do parâmetro
-        const challenge = req.query['hub.challenge'];  // Resposta do desafio
-
-        // Comparar o token recebido com o esperado
-        if (verificationToken === 'dfsdfsdfd') {
-            // Se o token for válido, retorna o desafio
-            return res.status(200).send(challenge);
-        } else {
-            // Se o token não for válido, retorna erro
-            return res.status(403).json({ status: '403', message: 'Token de verificação inválido' });
-        }
-    }
-
-    // Se não for uma requisição GET, provavelmente é uma requisição POST com dados do webhook
-    // Aqui você pode processar a mensagem do webhook
-    if (req.method === 'POST') {
-        // Seu código para processar a mensagem do webhook aqui
-        
-        console.log("Mensagem do webhook:", req.body);
-        // Retorne uma resposta de sucesso
-        return res.status(200).json({ status: '200', message: 'Mensagem recebida com sucesso' });
-    }
-
-    // Caso o método não seja GET ou POST
-    return res.status(405).json({ status: '405', message: 'Método não permitido' });
+    console.log("Dados da requisição:", req.body);
+    return res.status(200).json({ status: '200', message: 'Mensagem recebida com sucesso' });
+   
 };
 
 
