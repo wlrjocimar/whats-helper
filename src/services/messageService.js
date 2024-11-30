@@ -46,14 +46,30 @@ const processMessage = async (messageBody, toNumber) => {
 
 
 const processMessageOfficialAPI = async (messageBody, toNumber) => {
-    // Converte toNumber para string, caso não seja uma string
-    const toNumberStr = `${toNumber}`; // Colocando entre aspas simples
+    const toNumberStr = `${toNumber}`; // Garantir que toNumber seja uma string
 
     console.log("Processando envio automático de mensagem para o destinatário:", toNumberStr);
     
     try {
-        // Envia a mensagem com o número de telefone formatado com aspas simples
-        const response = await axios({
+        // Envia a requisição para o servidor que processa a mensagem
+        const chatPassadoResponse = await axios({
+            url: 'http://inovaestudios.com.br:8093/flexybot-api/chat',
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            data: JSON.stringify({
+                mensagem: messageBody
+            })
+        });
+
+        // Se a requisição for bem-sucedida, a resposta virá com a mensagem processada
+        const processedMessage = chatPassadoResponse.data.resposta || messageBody; // Usar a resposta ou a mensagem original
+
+        console.log("Mensagem processada retornada do chat gpt",processedMessage)
+
+        // Agora envia a mensagem via WhatsApp com a resposta recebida
+        const whatsappResponse = await axios({
             url: `https://graph.facebook.com/v21.0/${process.env.ID_ORIGIN_PHONE}/messages`,
             method: 'post',
             headers: {
@@ -62,16 +78,16 @@ const processMessageOfficialAPI = async (messageBody, toNumber) => {
             },
             data: JSON.stringify({
                 messaging_product: 'whatsapp',
-                to: toNumberStr, // Aqui o número com aspas simples será incluído
+                to: toNumberStr, // Número de telefone do destinatário
                 type: 'text',
                 text: {
-                    body: messageBody
+                    body: processedMessage
                 }
             })
         });
 
-        // Log do retorno da API (para debugar, se necessário)
-       // console.log("Resposta da API:", response.data);
+        // Log da resposta da API (para debugar, se necessário)
+        // console.log("Resposta da API do WhatsApp:", whatsappResponse.data);
 
     } catch (error) {
         console.error("Erro ao enviar a mensagem:", error);
