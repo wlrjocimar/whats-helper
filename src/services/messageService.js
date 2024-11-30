@@ -1,3 +1,4 @@
+
 require('dotenv').config(); // Carrega variáveis de ambiente
 const axios =require('axios');
 
