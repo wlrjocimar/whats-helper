@@ -625,7 +625,7 @@ exports.sendTextMessage=async(req,res,next)=> {
         },
         data:JSON.stringify({
             messaging_product:'whatsapp',
-            to:'5541997282239',
+            to:'554197282239',
             type:'text',
             text:{
                 body:'This is a text message'
