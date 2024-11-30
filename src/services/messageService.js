@@ -64,7 +64,7 @@ const processMessageOfficialAPI = async (messageBody, toNumber) => {
         });
 
         // Se a requisição for bem-sucedida, a resposta virá com a mensagem processada
-        const processedMessage = chatPassadoResponse.data.resposta || messageBody; // Usar a resposta ou a mensagem original
+        const processedMessage = chatPassadoResponse.data; // Usar a resposta ou a mensagem original
 
         console.log("Mensagem processada retornada do chat gpt",chatPassadoResponse)
 
