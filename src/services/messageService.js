@@ -66,7 +66,7 @@ const processMessageOfficialAPI = async (messageBody, toNumber) => {
         // Se a requisição for bem-sucedida, a resposta virá com a mensagem processada
         const processedMessage = chatPassadoResponse.data.resposta || messageBody; // Usar a resposta ou a mensagem original
 
-        console.log("Mensagem processada retornada do chat gpt",processedMessage)
+        console.log("Mensagem processada retornada do chat gpt",chatPassadoResponse)
 
         // Agora envia a mensagem via WhatsApp com a resposta recebida
         const whatsappResponse = await axios({
