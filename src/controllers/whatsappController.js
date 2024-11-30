@@ -611,6 +611,7 @@ setInterval(() => {
 
 exports.sendTextMessage=async(req,res,next)=> {
 
+    const {to,body} = req.body;
     
 
     const response = await axios({
@@ -625,10 +626,10 @@ exports.sendTextMessage=async(req,res,next)=> {
         },
         data:JSON.stringify({
             messaging_product:'whatsapp',
-            to:'554197282239',
+            to:to,
             type:'text',
             text:{
-                body:'This is a text message'
+                body:body
                 
             }
 
