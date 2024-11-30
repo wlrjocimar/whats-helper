@@ -193,7 +193,7 @@ exports.sendMessageTemplate=async(req,res,next)=> {
     
 
     const response = await axios({
-        url:'https://graph.facebook.com/v21.0/527299920456814/messages',
+        url:`https://graph.facebook.com/v21.0/${process.env.ID_ORIGIN_PHONE}/messages`,
         method:'post',
         headers:{
             'Authorization':`Bearer ${process.env.WHATSAPP_APP}`,
@@ -615,7 +615,7 @@ exports.sendTextMessage=async(req,res,next)=> {
     
 
     const response = await axios({
-        url:'https://graph.facebook.com/v21.0/527299920456814/messages',
+        url:`https://graph.facebook.com/v21.0/${process.env.ID_ORIGIN_PHONE}/messages`,
         method:'post',
         headers:{
             'Authorization':`Bearer ${process.env.WHATSAPP_APP}`,
@@ -650,7 +650,7 @@ exports.sendMediaMessage=async(req,res,next)=> {
     
 
     const response = await axios({
-        url:'https://graph.facebook.com/v21.0/527299920456814/messages',
+        url:`https://graph.facebook.com/v21.0/${process.env.ID_ORIGIN_PHONE}/messages`,
         method:'post',
         headers:{
             'Authorization':`Bearer ${process.env.WHATSAPP_APP}`,
@@ -690,7 +690,7 @@ exports.sendUploadMediaMessage=async(req,res,next)=> {
 
 
     const response = await axios({
-        url:'https://graph.facebook.com/v21.0/527299920456814/media',
+        url:`https://graph.facebook.com/v21.0/${process.env.ID_ORIGIN_PHONE}/media`,
         method:'post',
         headers:{
             'Authorization':`Bearer ${process.env.WHATSAPP_APP}`
