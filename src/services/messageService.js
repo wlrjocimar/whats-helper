@@ -53,7 +53,7 @@ const processMessageOfficialAPI = async (messageBody, toNumber) => {
     try {
         // Envia a mensagem com o número de telefone formatado com aspas simples
         const response = await axios({
-            url: 'https://graph.facebook.com/v21.0/527299920456814/messages',
+            url: 'https://graph.facebook.com/v21.0/481318875067572/messages',
             method: 'post',
             headers: {
                 'Authorization': `Bearer ${process.env.WHATSAPP_APP}`,
