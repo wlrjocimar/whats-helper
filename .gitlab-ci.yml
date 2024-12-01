@@ -8,4 +8,4 @@ prod:
     - chmod 600 key.pem
     - ssh -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" -i key.pem root@inovaestudios.com.br "cd /dados/webapps/whats-helper && git fetch origin && git reset --hard origin/master && npm  install && pm2 restart whats-helper"
   only:
-    - master
+    - main
