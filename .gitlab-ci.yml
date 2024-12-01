@@ -6,12 +6,6 @@ prod:
   script:
     - echo "$SSH_KEY_INOVAESTUDIOS" > key.pem
     - chmod 600 key.pem
-    - ssh -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" -i key.pem root@inovaestudios.com.br '
-        cd /dados/webapps/whats-helper && 
-        git fetch -o gitlab && 
-        git reset --hard origin/main && 
-        # Adicionar o PM2 ao PATH antes de usá-lo
-        export PATH=$PATH:/usr/local/bin && 
-        pm2 list'
+    - ssh -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" -i key.pem root@inovaestudios.com.br "cd /dados/webapps/whats-helper && git fetch -o gitlab && git reset --hard origin/main && export PATH=\$PATH:/usr/local/bin && pm2 list"
   only:
     - main
