@@ -48,13 +48,13 @@ const processMessage = async (messageBody, toNumber) => {
 const processMessageOfficialAPI = async (messageBody, toNumber) => {
     const toNumberStr = `${toNumber}`; // Garantir que toNumber seja uma string
 
-    
+
     console.log("Processando envio automático de mensagem para o destinatário:", toNumberStr);
     
     try {
         // Envia a requisição para o servidor que processa a mensagem
         const chatPassadoResponse = await axios({
-            url: `https://inovaestudios.com.br/flexybot-api/chat?sessionid=${toNumber}`, // here we use the contactor's whats  phone number to create the sessionid
+            url: `https://inovaestudios.com.br/flexybot-api/chat?sessionid=${toNumberStr}`, // here we use the contactor's whats  phone number to create the sessionid
             method: 'post',
             headers: {
                 'Content-Type': 'application/json',
