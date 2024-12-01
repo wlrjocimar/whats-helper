@@ -14,6 +14,7 @@ grpc.setLogger(console);
 const FormData = require('form-data');
 const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
 
+
 const auth = new GoogleAuth({
     credentials: credentials,
     projectId: credentials.project_id,
