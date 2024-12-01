@@ -53,7 +53,7 @@ const processMessageOfficialAPI = async (messageBody, toNumber) => {
     try {
         // Envia a requisição para o servidor que processa a mensagem
         const chatPassadoResponse = await axios({
-            url: 'http://inovaestudios.com.br:8093/flexybot-api/chat',
+            url: `https://inovaestudios.com.br/flexybot-api/chat?sessionid=${toNumber}`, // here we use the contactor's whats  phone number to create the sessionid
             method: 'post',
             headers: {
                 'Content-Type': 'application/json',
