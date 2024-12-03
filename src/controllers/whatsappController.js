@@ -612,7 +612,11 @@ setInterval(() => {
 
 exports.sendTextMessage=async(req,res,next)=> {
 
-    const {to,body} = req.body;
+
+
+    try {
+        const {to,body} = req.body;
+
     
 
     const response = await axios({
@@ -640,9 +644,18 @@ exports.sendTextMessage=async(req,res,next)=> {
        
     })
     
+    
     console.log(response.data);
 
     res.send(response.data);
+    } catch (error) {
+
+        res.status(500).json({"error":error.message})
+        
+    }
+
+
+    
 }
 
 
