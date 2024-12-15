@@ -747,10 +747,23 @@ async function downloadMedia(mediaUrl, accessToken, downloadPath) {
     });
 }
 
-// Função para transcrever áudio com AssemblyAI a partir de uma URL
-async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
+// Função para transcrever áudio com AssemblyAI
+async function transcribeAudioWithAssemblyAI2(filePath, languageCode = 'pt') {
     try {
-        // Inicia a transcrição com a URL do áudio
+        // Lê o arquivo de áudio
+        const file = fs.readFileSync(filePath);
+
+        // Faz o upload para o AssemblyAI
+        const uploadResponse = await axios.post('https://api.assemblyai.com/v2/upload', file, {
+            headers: {
+                'authorization': process.env.ASSEMBLYAI_API_KEY,
+                'content-type': 'audio/wav', // Ajuste o tipo de arquivo conforme necessário
+            },
+        });
+
+        const audioUrl = uploadResponse.data.upload_url;
+
+        // Inicia a transcrição
         const transcriptionResponse = await axios.post('https://api.assemblyai.com/v2/transcript', {
             audio_url: audioUrl,
             language_code: languageCode, // Código do idioma
@@ -776,6 +789,7 @@ async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
 
         if (result.status === 'completed') {
             const transcription = result.text;
+           // console.log(`Transcrição: ${transcription}`);
             return transcription;
         } else {
             throw new Error('Falha na transcrição.');
@@ -786,9 +800,10 @@ async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
     }
 }
 
-
 // Função para receber a mensagem de áudio ou texto via API
 exports.receiveMessageOfficialApiPost = async (req, res) => {
+    //console.log("Dados da requisição:", JSON.stringify(req.body, null, 2));
+
     const entry = req.body.entry && req.body.entry[0];
     const changes = entry && entry.changes && entry.changes[0];
     const messages = changes && changes.value && changes.value.messages;
@@ -805,12 +820,21 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
             try {
                 // Obter a URL do áudio
                 const audioUrl = await getMediaUrl(mediaId, accessToken);
-                console.log("URL do áudio:", audioUrl);
+                //console.log("URL do áudio:", audioUrl);
 
-                // Transcreve o áudio diretamente usando a URL
-                const transcription = await transcribeAudioWithAssemblyAI2(audioUrl);
-                console.log("Transcrição do áudio:", transcription);
-                messageService.processMessageOfficialAPI(transcription, from);
+                // Baixar o áudio
+                const audioFilePath = './audio.ogg'; // Caminho para salvar o áudio
+                await downloadMedia(audioUrl, accessToken, audioFilePath);
+                //console.log("Áudio baixado com sucesso.");
+
+                // Converte o áudio de .ogg para .wav (necessário para o AssemblyAI)
+                const convertedAudioPath = './audio.wav';
+                await convertOggToWav(audioFilePath, convertedAudioPath); // Implemente a função de conversão se necessário
+
+                // Transcreve o áudio
+                const transcription = await transcribeAudioWithAssemblyAI2(convertedAudioPath);
+                //console.log("Transcrição do áudio:", transcription);
+                messageService.processMessageOfficialAPI(transcription,from);
 
                 // Retorna a transcrição ou outros dados conforme necessário
                 return res.status(200).json({
@@ -831,9 +855,12 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
 
         // Verifica se é uma mensagem de texto
         if (message.text) {
+            // Verifique se 'message.text' contém o texto diretamente
             const messageText = message.text.body; // Acessando a propriedade de texto diretamente
-            messageService.processMessageOfficialAPI(messageText, from);
+            //console.log(`Mensagem de texto recebida de ${from}: ${messageText}`);
+            messageService.processMessageOfficialAPI(messageText,from);
         }
+
 
         // Responde de volta, se necessário
         return res.status(200).json({
@@ -845,7 +872,6 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         return res.status(400).json({ status: '400', message: 'Nenhuma mensagem encontrada' });
     }
 };
-
 
 // Função para converter áudio .ogg para .wav (precisa ser implementada)
 async function convertOggToWav(inputPath, outputPath) {
