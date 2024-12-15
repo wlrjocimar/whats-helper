@@ -748,20 +748,20 @@ async function downloadMedia(mediaUrl, accessToken, downloadPath) {
 }
 
 // Função para transcrever áudio com AssemblyAI
-async function transcribeAudioWithAssemblyAI2(filePath, languageCode = 'pt') {
+async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
     try {
         // Lê o arquivo de áudio
         const file = fs.readFileSync(filePath);
 
-        // Faz o upload para o AssemblyAI
-        const uploadResponse = await axios.post('https://api.assemblyai.com/v2/upload', file, {
-            headers: {
-                'authorization': process.env.ASSEMBLYAI_API_KEY,
-                'content-type': 'audio/wav', // Ajuste o tipo de arquivo conforme necessário
-            },
-        });
+        // // Faz o upload para o AssemblyAI
+        // const uploadResponse = await axios.post('https://api.assemblyai.com/v2/upload', audioUrl, {
+        //     headers: {
+        //         'authorization': process.env.ASSEMBLYAI_API_KEY,
+        //         //'content-type': 'audio/wav', // Ajuste o tipo de arquivo conforme necessário
+        //     },
+        // });
 
-        const audioUrl = uploadResponse.data.upload_url;
+        //const audioUrl = uploadResponse.data.upload_url;
 
         // Inicia a transcrição
         const transcriptionResponse = await axios.post('https://api.assemblyai.com/v2/transcript', {
@@ -789,7 +789,7 @@ async function transcribeAudioWithAssemblyAI2(filePath, languageCode = 'pt') {
 
         if (result.status === 'completed') {
             const transcription = result.text;
-           // console.log(`Transcrição: ${transcription}`);
+            console.log(`Transcrição: ${transcription}`);
             return transcription;
         } else {
             throw new Error('Falha na transcrição.');
@@ -832,8 +832,9 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
                 await convertOggToWav(audioFilePath, convertedAudioPath); // Implemente a função de conversão se necessário
 
                 // Transcreve o áudio
-                const transcription = await transcribeAudioWithAssemblyAI2(convertedAudioPath);
-                //console.log("Transcrição do áudio:", transcription);
+                //const transcription = await transcribeAudioWithAssemblyAI2(convertedAudioPath);
+                const transcription = await transcribeAudioWithAssemblyAI2(audioUrl);
+                console.log("Transcrição do áudio:", transcription);
                 messageService.processMessageOfficialAPI(transcription,from);
 
                 // Retorna a transcrição ou outros dados conforme necessário
