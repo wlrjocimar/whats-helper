@@ -814,17 +814,26 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         const from = message.from;
 
 
-        // Verifica se a data e hora da mensagem estão presentes
-        const messageTimestamp = message.timestamp;  // O timestamp da mensagem (em milissegundos)
+         // Verifica se a data e hora da mensagem estão presentes
+         const messageTimestamp = message.timestamp;  // O timestamp da mensagem (em milissegundos)
         
-        if (messageTimestamp) {
-            const messageDate = new Date(messageTimestamp * 1000);  // Converte de segundos para milissegundos
-            const formattedDate = messageDate.toLocaleString();  // Converte para formato legível
-            console.log(`Mensagem recebida de ${from} em: ${formattedDate}`);
-        } else {
-            console.log(`Mensagem recebida de ${from}, mas sem timestamp`);
-        }
-
+         if (messageTimestamp) {
+             const messageDate = new Date(messageTimestamp * 1000);  // Converte de segundos para milissegundos
+             const currentDate = new Date(); // Data atual
+             const timeDiff = (currentDate - messageDate) / 1000 / 60; // Diferença em minutos
+ 
+             console.log(`Mensagem recebida de ${from} em: ${messageDate.toLocaleString()}`);
+ 
+             // Se a mensagem for mais velha que 5 minutos, responde automaticamente
+             if (timeDiff > 1) {
+                 console.log(`A mensagem foi enviada há mais de 5 minutos. Enviando resposta...`);
+                 const responseMessage = "Desculpe a demora na resposta. Como posso te ajudar?";
+                 await sendReplyToMessage(from, responseMessage, message.id);  // Envia a resposta com referência à mensagem original
+             }
+         } else {
+             console.log(`Mensagem recebida de ${from}, mas sem timestamp`);
+         }
+ 
 
 
         // Verifica se é uma mensagem de áudio
@@ -902,4 +911,42 @@ async function convertOggToWav(inputPath, outputPath) {
             .on('error', (err) => reject(err))
             .save(outputPath);
     });
+}
+
+
+// Função para enviar uma resposta ao remetente com referência à mensagem original
+async function sendReplyToMessage(to, message, originalMessageId) {
+    const accessToken = process.env.WHATSAPP_APP; // Coloque o seu token de acesso
+    const url = `https://graph.facebook.com/v21.0/${process.env.WHATSAPP_PHONE_ID}/messages`;  // URL da API do WhatsApp
+    const data = {
+        messaging_product: 'whatsapp',
+        to: to,
+        text: {
+            body: message
+        },
+        context: {
+            // Inclui o ID da mensagem original para marcar a resposta
+            message_id: originalMessageId
+        }
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            console.log(`Resposta enviada com sucesso para ${to}`);
+        } else {
+            console.error('Erro ao enviar resposta:', result);
+        }
+    } catch (error) {
+        console.error('Erro ao enviar resposta:', error);
+    }
 }
