@@ -747,11 +747,23 @@ async function downloadMedia(mediaUrl, accessToken, downloadPath) {
     });
 }
 
-// Função para transcrever áudio com AssemblyAI a partir de uma URL
-async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
-    console.log("Vamos tentar transcrever o áudio:", audioUrl);
+// Função para transcrever áudio com AssemblyAI
+async function transcribeAudioWithAssemblyAI2(filePath, languageCode = 'pt') {
     try {
-        // Inicia a transcrição com a URL do áudio
+        // Lê o arquivo de áudio
+        const file = fs.readFileSync(filePath);
+
+        // Faz o upload para o AssemblyAI
+        const uploadResponse = await axios.post('https://api.assemblyai.com/v2/upload', file, {
+            headers: {
+                'authorization': process.env.ASSEMBLYAI_API_KEY,
+                'content-type': 'audio/wav', // Ajuste o tipo de arquivo conforme necessário
+            },
+        });
+
+        const audioUrl = uploadResponse.data.upload_url;
+
+        // Inicia a transcrição
         const transcriptionResponse = await axios.post('https://api.assemblyai.com/v2/transcript', {
             audio_url: audioUrl,
             language_code: languageCode, // Código do idioma
@@ -761,35 +773,23 @@ async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
             },
         });
 
-        // Verifica o ID da transcrição
         const transcriptionId = transcriptionResponse.data.id;
-        console.log("ID da transcrição:", transcriptionId);
 
         // Aguarda a transcrição ser concluída
         let result;
         do {
-            console.log('Aguardando transcrição...'); // Adiciona log de aguardando
             await new Promise(resolve => setTimeout(resolve, 5000)); // Atraso de 5 segundos
             const statusResponse = await axios.get(`https://api.assemblyai.com/v2/transcript/${transcriptionId}`, {
                 headers: {
                     'authorization': process.env.ASSEMBLYAI_API_KEY,
                 },
             });
-
             result = statusResponse.data;
-            console.log('Status da transcrição:', result.status); // Log do status da transcrição
-
-            // Se falhou, loga o erro para depuração
-            if (result.status === 'failed') {
-                console.error('Erro na transcrição:', result.error);
-                throw new Error(`Falha na transcrição: ${result.error}`);
-            }
         } while (result.status !== 'completed' && result.status !== 'failed');
 
-        // Verifica se a transcrição foi completada
         if (result.status === 'completed') {
             const transcription = result.text;
-            console.log("Transcrição concluída:", transcription);
+           // console.log(`Transcrição: ${transcription}`);
             return transcription;
         } else {
             throw new Error('Falha na transcrição.');
@@ -799,8 +799,6 @@ async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
         throw error;
     }
 }
-
-
 
 // Função para receber a mensagem de áudio ou texto via API
 exports.receiveMessageOfficialApiPost = async (req, res) => {
@@ -834,8 +832,7 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
                 await convertOggToWav(audioFilePath, convertedAudioPath); // Implemente a função de conversão se necessário
 
                 // Transcreve o áudio
-                //const transcription = await transcribeAudioWithAssemblyAI2(convertedAudioPath);
-                const transcription = await transcribeAudioWithAssemblyAI2(audioUrl);
+                const transcription = await transcribeAudioWithAssemblyAI2(convertedAudioPath);
                 console.log("Transcrição do áudio:", transcription);
                 messageService.processMessageOfficialAPI(transcription,from);
 
