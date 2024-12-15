@@ -749,6 +749,7 @@ async function downloadMedia(mediaUrl, accessToken, downloadPath) {
 
 // Função para transcrever áudio com AssemblyAI a partir de uma URL
 async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
+    console.log("Vamos tentar trancrever o audio", audioUrl)
     try {
         // Inicia a transcrição com a URL do áudio
         const transcriptionResponse = await axios.post('https://api.assemblyai.com/v2/transcript', {
@@ -761,6 +762,7 @@ async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
         });
 
         const transcriptionId = transcriptionResponse.data.id;
+        console.log("Id da transcrricao",transcriptionId)
 
         // Aguarda a transcrição ser concluída
         let result;
