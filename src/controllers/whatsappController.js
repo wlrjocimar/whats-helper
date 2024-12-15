@@ -751,7 +751,7 @@ async function downloadMedia(mediaUrl, accessToken, downloadPath) {
 async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
     try {
         // Lê o arquivo de áudio
-        const file = fs.readFileSync(filePath);
+        //const file = fs.readFileSync(filePath);
 
         // // Faz o upload para o AssemblyAI
         // const uploadResponse = await axios.post('https://api.assemblyai.com/v2/upload', audioUrl, {
