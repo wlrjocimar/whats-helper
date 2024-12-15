@@ -815,9 +815,9 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         if (messageTimestamp) {
             const messageDate = new Date(messageTimestamp * 1000);  // Converte de segundos para milissegundos
             const formattedDate = messageDate.toLocaleString();  // Converte para formato legível
-            console.log(`Mensagem recebida de ${from} em: ${formattedDate}`);
+            console.log(`Mensagem recebida de ${messages[0].from} em: ${formattedDate}`);
         } else {
-            console.log(`Mensagem recebida de ${from}, mas sem timestamp`);
+            console.log(`Mensagem recebida de ${message[0].from}, mas sem timestamp`);
         }
 
 
