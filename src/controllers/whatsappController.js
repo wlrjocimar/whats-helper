@@ -816,6 +816,8 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
 
          // Verifica se a data e hora da mensagem estão presentes
          const messageTimestamp = message.timestamp;  // O timestamp da mensagem (em milissegundos)
+         await sendReplyToMessage(from, responseMessage, message.id);
+         return;
         
          if (messageTimestamp) {
              const messageDate = new Date(messageTimestamp * 1000);  // Converte de segundos para milissegundos
