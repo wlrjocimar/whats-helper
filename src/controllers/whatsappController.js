@@ -919,6 +919,9 @@ async function convertOggToWav(inputPath, outputPath) {
 
 // Função para enviar uma resposta ao remetente com referência à mensagem original
 async function sendReplyToMessage(to, message, originalMessageId) {
+
+    console.log("Id da mensagem", originalMessageId)
+
     const accessToken = process.env.WHATSAPP_APP; // Coloque o seu token de acesso
     const url = `https://graph.facebook.com/v21.0/${process.env.WHATSAPP_PHONE_ID}/messages`;  // URL da API do WhatsApp
     const data = {
