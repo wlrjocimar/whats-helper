@@ -816,9 +816,6 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
 
          // Verifica se a data e hora da mensagem estão presentes
          const messageTimestamp = message.timestamp;  // O timestamp da mensagem (em milissegundos)
-         const responseMessage = "Desculpe a demora na resposta. Como posso te ajudar?";
-         await sendReplyToMessage(from, responseMessage, message.id);
-         return;
         
          if (messageTimestamp) {
              const messageDate = new Date(messageTimestamp * 1000);  // Converte de segundos para milissegundos
@@ -828,9 +825,9 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
              console.log(`Mensagem recebida de ${from} em: ${messageDate.toLocaleString()}`);
  
              // Se a mensagem for mais velha que 5 minutos, responde automaticamente
-             if (timeDiff > 1) {
+             if (timeDiff > 5) {
                  console.log(`A mensagem foi enviada há mais de 5 minutos. Enviando resposta...`);
-                 const responseMessage = "Desculpe a demora na resposta. Como posso te ajudar?";
+                 const responseMessage = "Desculpe mas esta mensagem não pode ser enviada a nossa assistente. Caso ainda necessite desta resposta peço por gentileza que refaça a pergunta";
                  await sendReplyToMessage(from, responseMessage, message.id);  // Envia a resposta com referência à mensagem original
              }
          } else {
@@ -919,11 +916,8 @@ async function convertOggToWav(inputPath, outputPath) {
 
 // Função para enviar uma resposta ao remetente com referência à mensagem original
 async function sendReplyToMessage(to, message, originalMessageId) {
-
-    console.log("Id da mensagem", originalMessageId)
-
     const accessToken = process.env.WHATSAPP_APP; // Coloque o seu token de acesso
-    const url = `https://graph.facebook.com/v21.0/${process.env.ID_ORIGIN_PHONE}/messages`;  // URL da API do WhatsApp
+    const url = `https://graph.facebook.com/v21.0/${process.env.WHATSAPP_PHONE_ID}/messages`;  // URL da API do WhatsApp
     const data = {
         messaging_product: 'whatsapp',
         to: to,
