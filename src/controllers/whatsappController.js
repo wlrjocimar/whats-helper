@@ -749,7 +749,7 @@ async function downloadMedia(mediaUrl, accessToken, downloadPath) {
 
 // Função para transcrever áudio com AssemblyAI a partir de uma URL
 async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
-    console.log("Vamos tentar trancrever o audio", audioUrl)
+    console.log("Vamos tentar transcrever o áudio:", audioUrl);
     try {
         // Inicia a transcrição com a URL do áudio
         const transcriptionResponse = await axios.post('https://api.assemblyai.com/v2/transcript', {
@@ -761,23 +761,35 @@ async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
             },
         });
 
+        // Verifica o ID da transcrição
         const transcriptionId = transcriptionResponse.data.id;
-        console.log("Id da transcrricao",transcriptionId)
+        console.log("ID da transcrição:", transcriptionId);
 
         // Aguarda a transcrição ser concluída
         let result;
         do {
+            console.log('Aguardando transcrição...'); // Adiciona log de aguardando
             await new Promise(resolve => setTimeout(resolve, 5000)); // Atraso de 5 segundos
             const statusResponse = await axios.get(`https://api.assemblyai.com/v2/transcript/${transcriptionId}`, {
                 headers: {
                     'authorization': process.env.ASSEMBLYAI_API_KEY,
                 },
             });
+
             result = statusResponse.data;
+            console.log('Status da transcrição:', result.status); // Log do status da transcrição
+
+            // Se falhou, loga o erro para depuração
+            if (result.status === 'failed') {
+                console.error('Erro na transcrição:', result.error);
+                throw new Error(`Falha na transcrição: ${result.error}`);
+            }
         } while (result.status !== 'completed' && result.status !== 'failed');
 
+        // Verifica se a transcrição foi completada
         if (result.status === 'completed') {
             const transcription = result.text;
+            console.log("Transcrição concluída:", transcription);
             return transcription;
         } else {
             throw new Error('Falha na transcrição.');
@@ -787,6 +799,7 @@ async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
         throw error;
     }
 }
+
 
 
 // Função para receber a mensagem de áudio ou texto via API
