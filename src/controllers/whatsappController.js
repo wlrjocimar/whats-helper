@@ -753,19 +753,19 @@ async function transcribeAudioWithAssemblyAI2(audioUrl, languageCode = 'pt') {
         // Lê o arquivo de áudio
         //const file = fs.readFileSync(filePath);
 
-        // // Faz o upload para o AssemblyAI
-        // const uploadResponse = await axios.post('https://api.assemblyai.com/v2/upload', audioUrl, {
-        //     headers: {
-        //         'authorization': process.env.ASSEMBLYAI_API_KEY,
-        //         //'content-type': 'audio/wav', // Ajuste o tipo de arquivo conforme necessário
-        //     },
-        // });
+        // Faz o upload para o AssemblyAI
+        const uploadResponse = await axios.post('https://api.assemblyai.com/v2/upload', audioUrl, {
+            headers: {
+                'authorization': process.env.ASSEMBLYAI_API_KEY,
+                //'content-type': 'audio/wav', // Ajuste o tipo de arquivo conforme necessário
+            },
+        });
 
-        //const audioUrl = uploadResponse.data.upload_url;
+        const audioUrl2 = uploadResponse.data.upload_url;
 
         // Inicia a transcrição
         const transcriptionResponse = await axios.post('https://api.assemblyai.com/v2/transcript', {
-            audio_url: audioUrl,
+            audio_url: audioUrl2,
             language_code: languageCode, // Código do idioma
         }, {
             headers: {
