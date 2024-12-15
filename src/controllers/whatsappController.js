@@ -809,21 +809,23 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
     const messages = changes && changes.value && changes.value.messages;
 
 
-    // Verifica se a data e hora da mensagem estão presentes
-        const messageTimestamp = messages[0].timestamp;  // O timestamp da mensagem (em milissegundos)
+    if (messages && messages.length > 0) {
+        const message = messages[0];
+        const from = message.from;
+
+
+        // Verifica se a data e hora da mensagem estão presentes
+        const messageTimestamp = message.timestamp;  // O timestamp da mensagem (em milissegundos)
         
         if (messageTimestamp) {
             const messageDate = new Date(messageTimestamp * 1000);  // Converte de segundos para milissegundos
             const formattedDate = messageDate.toLocaleString();  // Converte para formato legível
-            console.log(`Mensagem recebida de ${messages[0].from} em: ${formattedDate}`);
+            console.log(`Mensagem recebida de ${from} em: ${formattedDate}`);
         } else {
-            console.log(`Mensagem recebida de ${message[0].from}, mas sem timestamp`);
+            console.log(`Mensagem recebida de ${from}, mas sem timestamp`);
         }
 
 
-    if (messages && messages.length > 0) {
-        const message = messages[0];
-        const from = message.from;
 
         // Verifica se é uma mensagem de áudio
         if (message.audio) {
