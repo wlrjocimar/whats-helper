@@ -932,7 +932,7 @@ async function sendReplyToMessage(to, message, originalMessageId) {
         },
         context: {
             // Inclui o ID da mensagem original para marcar a resposta
-            messageId: originalMessageId
+            message_id: originalMessageId
         }
     };
 
