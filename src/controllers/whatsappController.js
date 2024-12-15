@@ -823,18 +823,21 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
                 //console.log("URL do áudio:", audioUrl);
 
                 // Baixar o áudio
-                const audioFilePath = './audio.ogg'; // Caminho para salvar o áudio
+                const audioFilePath = `./audio-${from}.ogg`; // Caminho para salvar o áudio
                 await downloadMedia(audioUrl, accessToken, audioFilePath);
                 //console.log("Áudio baixado com sucesso.");
 
                 // Converte o áudio de .ogg para .wav (necessário para o AssemblyAI)
-                const convertedAudioPath = './audio.wav';
+                const convertedAudioPath = `./audio-${from}.wav`;
                 await convertOggToWav(audioFilePath, convertedAudioPath); // Implemente a função de conversão se necessário
 
                 // Transcreve o áudio
                 const transcription = await transcribeAudioWithAssemblyAI2(convertedAudioPath);
                 console.log("Transcrição do áudio:", transcription);
                 messageService.processMessageOfficialAPI(transcription,from);
+                // Remover os arquivos de áudio após o processamento
+                fs.unlinkSync(audioFilePath); // Remove o arquivo .ogg
+                fs.unlinkSync(convertedAudioPath); // Remove o arquivo .wav
 
                 // Retorna a transcrição ou outros dados conforme necessário
                 return res.status(200).json({
