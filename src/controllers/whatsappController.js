@@ -831,8 +831,9 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
              // Se a mensagem for mais velha que 5 minutos, responde automaticamente
              if (timeDiff > 5) {
                  console.log(`A mensagem foi enviada há mais de 5 minutos. Enviando resposta...`);
-                 const responseMessage = "Desculpe mas esta mensagem não pode ser enviada a nossa assistente. Caso ainda necessite desta resposta peço por gentileza que refaça a pergunta";
-                 await sendReplyToMessage(from, responseMessage, message.id);  // Envia a resposta com referência à mensagem original
+                 //por hora nao vamos responder mensagem antigas com mais de 5 minutos de delay
+                //  const responseMessage = "Desculpe mas esta mensagem não pode ser enviada a nossa assistente. Caso ainda necessite desta resposta peço por gentileza que refaça a pergunta";
+                //  await sendReplyToMessage(from, responseMessage, message.id);  // Envia a resposta com referência à mensagem original
                  return;
              }
          } else {
