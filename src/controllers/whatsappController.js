@@ -814,7 +814,8 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
         const from = message.from;
 
 
-         // Verifica se a data e hora da mensagem estão presentes
+        try {
+             // Verifica se a data e hora da mensagem estão presentes
          const messageTimestamp = message.timestamp;  // O timestamp da mensagem (em milissegundos)
         
          if (messageTimestamp) {
@@ -834,6 +835,12 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
          } else {
              console.log(`Mensagem recebida de ${from}, mas sem timestamp`);
          }
+            
+        } catch (error) {
+            
+            console.log("errooooooooooo ", error)
+        }
+        
  
 
 
