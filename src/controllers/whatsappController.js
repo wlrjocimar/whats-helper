@@ -829,6 +829,7 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
                  console.log(`A mensagem foi enviada há mais de 5 minutos. Enviando resposta...`);
                  const responseMessage = "Desculpe mas esta mensagem não pode ser enviada a nossa assistente. Caso ainda necessite desta resposta peço por gentileza que refaça a pergunta";
                  await sendReplyToMessage(from, responseMessage, message.id);  // Envia a resposta com referência à mensagem original
+                 return;
              }
          } else {
              console.log(`Mensagem recebida de ${from}, mas sem timestamp`);
