@@ -812,6 +812,10 @@ exports.receiveMessageOfficialApiPost = async (req, res) => {
     if (messages && messages.length > 0) {
         const message = messages[0];
         const from = message.from;
+
+        const responseMessage = "Desculpe mas esta mensagem não pode ser enviada a nossa assistente. Caso ainda necessite desta resposta peço por gentileza que refaça a pergunta";
+                 await sendReplyToMessage(from, responseMessage, message.id);  // Envia a resposta com referência à mensagem original
+                 return;
         
 
 
